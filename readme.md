@@ -1,6 +1,8 @@
 ## Namespace.nvim
 
 Neovim Php Namespace Resolver
+GetAllClasses Doesn't get all classes because cant get the for loop to wait for ui response until i find solution
+use GetClass.
 
 ## Install
 
