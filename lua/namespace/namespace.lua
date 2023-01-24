@@ -4,7 +4,8 @@ local List = require("plenary.collections.py_list")
 local pop = require("namespace.ui")
 local Job = require("plenary.job")
 local pclss = require("namespace.classes")
-
+local rt = require("namespace.root")
+local rootDir = require("namespace.rootDir").searchRootDir()
 
 local M = {}
 
@@ -16,39 +17,9 @@ function vim.fs.exists(name)
     return true
 end
 
--- getRoot
-M.getRoot = function(language, bufnr)
-    bufnr = bufnr or vim.api.nvim_get_current_buf()
-
-    -- if vim.bo[bufnr].filetype ~= language then
-    -- vim.notify "Invalid filetype *.php"
-    -- return
-    -- end
-    local parser = vim.treesitter.get_parser(bufnr, language, {})
-    local tree = parser:parse()[1]
-    return tree:root(), bufnr
-end
-
--- finds the root directory
-M.rootDir = function()
-    local root_dir
-    for dir in vim.fs.parents(vim.api.nvim_buf_get_name(0)) do
-        if vim.fn.isdirectory(dir .. "/.git") == 1 then
-            root_dir = dir
-            break
-        elseif vim.fn.isdirectory(dir .. "/vendor") == 1 then
-            root_dir = dir
-            break
-        end
-    end
-    return root_dir
-end
-
-
-
 --getClassNames from the buffer
 M.getClassNames = function()
-    local root, bufnr = M.getRoot("php")
+    local root, bufnr = rt.getRoot("php")
 
     local query = vim.treesitter.parse_query(
         "php",
@@ -117,7 +88,7 @@ M.searchParse = function(class)
     local searched = List({})
     -- get class namespace prefix
     local bufnr = M.searchBufnr(class)
-    local root = M.getRoot("php", bufnr)
+    local root = rt.getRoot("php", bufnr)
     local query = vim.treesitter.parse_query(
         "php",
         [[
@@ -145,7 +116,7 @@ M.fzfSearch = function(classes, prefix, dir)
     if #classes == 0 then
         return List({})
     end
-    dir = dir or M.rootDir()
+    -- dir = dir or M.rootDir()
     local paths = List({})
     for _, class in classes:iter() do
         local fzf = Job:new({
@@ -153,7 +124,7 @@ M.fzfSearch = function(classes, prefix, dir)
             writer = Job:new({
                 command = "fd",
                 args = { "-E", "vendor", "-E", "node_modules" },
-                cwd = dir, --TODO--change it current directory later
+                cwd = rootDir --TODO--change it current directory later
             }),
             args = { "-e", "+i", "--filter", "/" .. class .. ".php" },
         })
@@ -166,7 +137,9 @@ M.fzfSearch = function(classes, prefix, dir)
             paths:insert(1, result)
         end
         -- if result == nil then
-        -- M.searchParse(class)           -- funds the missing import but cant get it to work
+        -- --funds the missing import but cant get it to work with popup might require corou
+        -- M.searchParse(class)
+
         -- paths:insert(1, ttbl)
         -- end
     end
@@ -178,14 +151,8 @@ end
 -- read composer.json
 -- creates buffer
 M.newBufnr = function(file)
-    -- local rootDir = M.rootDir() --doesn't work yet
-    if not vim.fs.exists(file) then
-        vim.notify "root dir dont work"
-        return
-    end
-
     local ctbl = {}
-    for line in io.lines(file) do
+    for line in io.lines(rootDir .. file) do
         table.insert(ctbl, line)
     end
 
@@ -198,7 +165,7 @@ end
 M.getComposerNamespace = function()
     -- get class namespace prefix
     local bufnr = M.newBufnr('composer.json')
-    local root = M.getRoot("json", bufnr)
+    local root = rt.getRoot("json", bufnr)
     local query = vim.treesitter.parse_query(
         "json",
         [[
@@ -230,7 +197,7 @@ end
 ----------------------
 
 M.getUsedClasses = function()
-    local root, bufnr = M.getRoot("php")
+    local root, bufnr = rt.getRoot("php")
 
     local query = vim.treesitter.parse_query("php", [[(namespace_use_declaration) @use]])
     local clsNames = List({})
@@ -296,7 +263,7 @@ M.getAllClasses = function()
 
     if #class >= 1 then
         local scls = M.sort(class) -- sort
-        vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, scls)
+        vim.api.nvim_buf_set_lines(bufnr, 1, 1, true, scls)
         vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #scls } }, true, {})
     end
 end
@@ -307,7 +274,7 @@ M.addToBuffer = function(line)
     line = line:gsub("%\\\\", "\\")
     line = "use " .. line .. ";"
     vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-    vim.api.nvim_buf_set_lines(buf, 3, 3, true, { line })
+    vim.api.nvim_buf_set_lines(buf, 1, 1, true, { line })
 end
 
 M.getClass = function()

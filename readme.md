@@ -21,11 +21,13 @@ Neovim Php Namespace Resolver
 
 -   `:GetClass` gets class under cursor
 
+-   `:SortClass` sorts classes
+
 ## Features to be add
 
 -   AutoNamespace generator
 
--   Better sort with options
+-   add options to sort, currently length
 
 ## Inspired
 

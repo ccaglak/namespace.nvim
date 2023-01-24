@@ -1,5 +1,6 @@
 -- main module file
 local ns = require("namespace.namespace")
+local sort = require("namespace.sort")
 
 local M = {}
 M.config = {
@@ -23,7 +24,11 @@ M.getClass = function()
     ns.getClass()
 end
 
-function M.reset()
+M.sortClass = function()
+    sort.sort()
+end
+
+function M.NsReset()
     require("plenary.reload").reload_module("namespace")
 end
 
