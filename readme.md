@@ -10,6 +10,14 @@ Neovim Php Namespace Resolver
 
 ```
 
+## Keymaps -- plugin doesn't set any keymaps
+
+```
+    vim.keymap.set("n", "la", "<cmd>GetAllClasses")
+    vim.keymap.set("n", "lc", "<cmd>GetClass")
+    vim.keymap.set("n", "ls", "<cmd>SortClass")
+```
+
 ## Requires
 
 -   pleanery.nvim

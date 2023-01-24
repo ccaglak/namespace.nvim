@@ -170,7 +170,7 @@ M.getComposerNamespace = function()
       key: (string (string_content) @psr) (#eq? @psr "psr-4")
       value: (object (pair
           key: (string (string_content) @prefix)
-          value: (string (string_content) @src_path (#match? @src_path "src|src/|app|app/|App/|Src/"))
+          value: (string (string_content) @src_path (#match? @src_path "src|app|App/|Src/"))
       ))
   ) @a
   ]]
