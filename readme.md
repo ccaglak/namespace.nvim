@@ -13,7 +13,7 @@ Neovim Php Namespace Resolver
 ## Requires
 
 -   pleanery.nvim
--   rg, fzf, fd - will try to reduce it
+-   rg
 
 ## Basic Usage
 
