@@ -63,6 +63,8 @@ M.getClass = function()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
 
     if native:contains(cWord) then
+        cWord = cWord:gsub("%\\\\", "\\")
+        cWord = "use " .. cWord .. ";"
         M.addToBuffer(cWord)
         return
     end
