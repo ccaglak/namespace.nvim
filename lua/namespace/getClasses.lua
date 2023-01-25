@@ -167,9 +167,7 @@ M.get = function()
                 sr = {}
             end
             if #sr > 1 then
-                local buf_nr = utils.searchBufnr(sr)
-                local ss = utils.searchParse(buf_nr)
-                pop.popup(ss)
+                pop.popup(sr)
                 sr = {}
             end
             if sr == nil then
