@@ -91,24 +91,6 @@ M.getComposerNamespace = function()
 end
 
 ----------------------
----  gets Existing use declarations
-----------------------
-
-M.getUsedClasses = function()
-    local root, bufnr = rt.getRoot("php")
-
-    local query = vim.treesitter.parse_query("php", [[(namespace_use_declaration) @use]])
-    local clsNames = List({})
-    for n, captures, _ in query:iter_matches(root, bufnr) do
-        local clsName = tq.get_node_text(captures[n], bufnr)
-        if not clsNames:contains(clsName) then
-            clsNames:insert(1, clsName)
-        end
-    end
-    return clsNames
-end
-
-----------------------
 --- check if class is native php class return user and php classes
 ----------------------
 M.checkClasses = function(clss)
@@ -173,11 +155,7 @@ M.getAllClasses = function()
     local fclss = M.getClassNames()
     local eclss = M.existingClasses()
 
-    P(fclss)
-    P(eclss)
-
     if #fclss == nil then return end
-    local clss = List({})
     if #eclss >= 1 then
         fclss = M.elimateClasses(fclss, eclss)
     end
