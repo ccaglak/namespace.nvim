@@ -9,20 +9,12 @@ local native = require("namespace.classes")
 
 local M = {}
 
-local function getBuffer(filename)
-    local buf_exists = vim.fn.bufexists(filename) ~= 0
-    if buf_exists then
-        return vim.fn.bufnr(filename)
-    end
-    return 0
-end
+
 
 M.searchBufnr = function(searched)
     local ctbl = List({ "<?php", "return array(" })
-
     local all = List({}):concat(ctbl, searched)
     all:push(");")
-
 
     local buf = vim.api.nvim_create_buf(false, false)
     vim.api.nvim_buf_set_lines(buf, 0, 0, true, { unpack(all) })
@@ -53,7 +45,7 @@ end
 
 M.addToBuffer = function(line)
     local bufname = vim.api.nvim_buf_get_name(0)
-    local buf = getBuffer(bufname)
+    local buf = utils.getBuffer(bufname)
     vim.api.nvim_buf_set_option(buf, 'modifiable', true)
     vim.api.nvim_buf_set_lines(buf, 1, 1, true, { line })
     vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})

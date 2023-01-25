@@ -1,11 +1,14 @@
 -- module represents a lua module for the plugin
-local tq = require("vim.treesitter.query")
-local List = require("plenary.collections.py_list")
-local pop = require("namespace.ui")
-local Job = require("plenary.job")
-local pclss = require("namespace.classes")
-local rt = require("namespace.root")
-local rootDir = require("namespace.rootDir").searchRootDir()
+local tq       = require("vim.treesitter.query")
+local List     = require("plenary.collections.py_list")
+local pop      = require("namespace.ui")
+local Job      = require("plenary.job")
+local pclss    = require("namespace.classes")
+local rt       = require("namespace.root")
+local rootDir  = require("namespace.rootDir").searchRootDir()
+local utils    = require("namespace.utils")
+local csSearch = require("namespace.csSearch")
+local rgSearch = require("namespace.rgSearch")
 
 local M = {}
 
@@ -183,14 +186,39 @@ M.sort = function(cls)
 end
 
 M.getAllClasses = function()
-    local bufnr = vim.api.nvim_get_current_buf()
+    local bufnr = utils.getBuffer()
     local prefix = M.getComposerNamespace()[2]
-    local cls = M.getClassNames()
-    local phpclss, userclss = M.checkClasses(cls)
-    local searchClss = M.fzfSearch(userclss, prefix)
+    local clss = M.getClassNames()
+
+    if #clss == nil then return end
+    local phpclss, uclss = M.checkClasses(clss)
+
+    local ccclss = List({})
+
+    for _, cls in uclss:iter() do
+        local sr = csSearch.CSearch(cls)
+        if sr == nil then
+            sr = rgSearch.RSearch(List({ cls }), prefix)
+            if sr == nil then
+                vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
+                return
+            end
+        end
+        local buf_nr = utils.searchBufnr(sr)
+        local fs = utils.searchParse(buf_nr)
+        fs = unpack(fs)
+        fs = fs:gsub("%\\\\", "\\")
+        fs = "use " .. fs .. ";"
+        ccclss:insert(1, fs)
+    end
+
+
+
+
+    -- local searchClss = M.fzfSearch(userclss, prefix)
 
     local usedclss = M.getUsedClasses()
-    local all = List({}):concat(phpclss, searchClss)
+    local all = List({}):concat(phpclss, ccclss)
     local class = M.elimateClasses(all, usedclss)
 
     if #class >= 1 then

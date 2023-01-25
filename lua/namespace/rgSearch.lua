@@ -3,7 +3,7 @@ local Job = require("plenary.job")
 local rootDir = require("namespace.rootDir").searchRootDir()
 
 local M = {}
-M.RSearch = function(classes, prefix, dir)
+M.RSearch = function(classes, prefix)
     if #classes == 0 then
         return List({})
     end

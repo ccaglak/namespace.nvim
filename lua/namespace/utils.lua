@@ -61,4 +61,46 @@ M.elimateClasses = function(all, usedclss)
     return c
 end
 
+M.searchBufnr = function(searched)
+    local ctbl = List({ "<?php", "return array(" })
+    local all = List({}):concat(ctbl, searched)
+    all:push(");")
+
+    local buf = vim.api.nvim_create_buf(false, false)
+    vim.api.nvim_buf_set_lines(buf, 0, 0, true, { unpack(all) })
+    return buf
+end
+
+M.searchParse = function(bufnr)
+    local searched = List({})
+    -- get class namespace prefix
+    local root = rt.getRoot("php", bufnr)
+    local query = vim.treesitter.parse_query(
+        "php",
+        [[
+(array_element_initializer
+  (string (string_value) @sv1)
+   (binary_expression right: (string (string_value) @sv2 ))
+  )
+  ]]
+    )
+    for _, captures, _ in query:iter_matches(root, bufnr) do
+        local ns = tq.get_node_text(captures[1], bufnr)
+        local source = tq.get_node_text(captures[2], bufnr) -- gets the file path
+        searched:insert(1, ns)
+    end
+    vim.api.nvim_buf_delete(bufnr, { force = true })
+    return searched
+end
+
+
+M.addToBuffer = function(line)
+    local bufname = vim.api.nvim_buf_get_name(0)
+    local buf = M.getBuffer(bufname)
+    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+    vim.api.nvim_buf_set_lines(buf, 1, 1, true, { line })
+    vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
+end
+
+
 return M
