@@ -62,11 +62,13 @@ end
 
 M.getClass = function()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
-
+    local used = utils.getUsedClasses()
     if native:contains(cWord) then
         cWord = cWord:gsub("%\\\\", "\\")
         cWord = "use " .. cWord .. ";"
-        M.addToBuffer(cWord)
+        if not used:contains(cWord) then
+            M.addToBuffer(cWord)
+        end
         return
     end
     local sr = csSearch.CSearch(cWord)
@@ -80,18 +82,21 @@ M.getClass = function()
     local bufnr = M.searchBufnr(sr)
     local searched = M.searchParse(bufnr)
 
-    local used = utils.getUsedClasses()
     local fclass = utils.elimateClasses(searched, used)
     if #searched == 1 then
         local line = fclass:unpack()
         line = line:gsub("%\\\\", "\\")
         line = "use " .. line .. ";"
-        M.addToBuffer(line)
+        if not used:contains(line) then
+            M.addToBuffer(line)
+            return
+        end
     elseif #searched > 1 then
         pop.popup(searched)
         return
     end
-    vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
+
+    -- vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
     searched = List({})
 end
 
