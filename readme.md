@@ -1,6 +1,6 @@
 ## Namespace.nvim
 
-Neovim Php Namespace Resolver - test on mac
+Neovim Php Namespace Resolver - tested on mac
 
 [![asciicast](https://asciinema.org/a/kqXkcSyzRJqU4or9lhLVoaxXq.svg)](https://asciinema.org/a/kqXkcSyzRJqU4or9lhLVoaxXq)
 
@@ -19,7 +19,7 @@ Neovim Php Namespace Resolver - test on mac
 
 ## Keymaps -- plugin doesn't set any keymaps
 
-```
+```vim
     vim.keymap.set("n", "<leader>la", "<cmd>GetAllClasses<cr>")
     vim.keymap.set("n", "<leader>lc", "<cmd>GetClass<cr>")
     vim.keymap.set("n", "<leader>ls", "<cmd>SortClass<cr>")
