@@ -18,7 +18,7 @@ M.addToBuffer = function(line)
     vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
 end
 
-M.getClass = function()
+M.get = function()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
     local used = utils.getUsedClasses()
     if native:contains(cWord) then

@@ -142,9 +142,7 @@ M.existingClasses = function()
     return clsNames
 end
 
-
-
-M.getAllClasses = function()
+M.get = function()
     local bufnr = utils.getBuffer()
     local prefix = M.getComposerNamespace()[2]
 
