@@ -56,6 +56,7 @@ M.addToBuffer = function(line)
     local buf = getBuffer(bufname)
     vim.api.nvim_buf_set_option(buf, 'modifiable', true)
     vim.api.nvim_buf_set_lines(buf, 1, 1, true, { line })
+    vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
 end
 
 
@@ -88,7 +89,6 @@ M.getClass = function()
         M.addToBuffer(line)
     elseif #searched > 1 then
         pop.popup(searched)
-    else
         return
     end
     vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
