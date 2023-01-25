@@ -1,4 +1,6 @@
--- module represents a lua module for the plugin
+-- :GetAllClasses
+-----------------
+
 local tq       = require("vim.treesitter.query")
 local List     = require("plenary.collections.py_list")
 local pop      = require("namespace.ui")
@@ -44,8 +46,6 @@ right: (name) @cls
     return clsNames
 end
 
-
-
 -- read composer.json
 -- creates buffer
 M.newBufnr = function(file)
@@ -59,7 +59,6 @@ M.newBufnr = function(file)
     return buf
 end
 
--- gets psr-4 prefix and autoload path
 M.getComposerNamespace = function()
     -- get class namespace prefix
     local bufnr = M.newBufnr('composer.json')
@@ -120,7 +119,6 @@ M.elimateClasses = function(all, usedclss)
     return c
 end
 
-
 M.sort = function(cls)
     local data = { cls:unpack() }
     table.sort(data, function(a, b) return #a < #b end)
@@ -144,7 +142,6 @@ M.existingClasses = function()
     return clsNames
 end
 
--- (namespace_use_clause (qualified_name (name) @name) ) --gets qualified_name
 
 
 M.getAllClasses = function()
@@ -178,8 +175,7 @@ M.getAllClasses = function()
                 local ss = utils.searchParse(buf_nr)
                 pop.popup(ss)
                 sr = {}
-            end -- else
-
+            end
         end
         if #sr > 1 then
             local buf_nr = utils.searchBufnr(sr)
@@ -188,9 +184,7 @@ M.getAllClasses = function()
         end
     end
 
-    -- local usedclss = M.getUsedClasses()
     local class = List({}):concat(phpclss, ccclss)
-    -- local class = M.elimateClasses(all, usedclss)
 
     if #class >= 1 then
         local scls = M.sort(class) -- sort

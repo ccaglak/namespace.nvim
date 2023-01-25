@@ -1,8 +1,6 @@
 ## Namespace.nvim
 
-Neovim Php Namespace Resolver
-
--   :GetAllClasses Doesn't get all classes because cant get the for loop to wait for ui response until i find solution use GetClass. Use :GetAllClasses the for the missing namespaces use
+Neovim Php Namespace Resolver - test on mac
 
 ## Install
 
