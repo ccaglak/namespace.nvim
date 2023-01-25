@@ -29,7 +29,7 @@ M.sortClass = function()
     sort.sort()
 end
 
-function M.NsReset()
+function M.reset()
     require("plenary.reload").reload_module("namespace")
 end
 

@@ -18,7 +18,6 @@ M.addToBuffer = function(line)
     vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
 end
 
-
 M.getClass = function()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
     local used = utils.getUsedClasses()
@@ -31,8 +30,9 @@ M.getClass = function()
         return
     end
     local sr = csSearch.CSearch(cWord)
-    if sr == nil then
+    if #sr == 0 then
         sr = rgSearch.RSearch(List({ cWord }))
+        M.addToBuffer(sr:unpack())
         if sr == nil then
             vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
             return

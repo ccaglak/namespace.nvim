@@ -44,43 +44,6 @@ right: (name) @cls
     return clsNames
 end
 
------------------------------------
---end
---------------------------------------------
--- searches the local directory for the class
--- TODO this will be second option if cant find the class trait or interface the in the composer
-M.fzfSearch = function(classes, prefix, dir)
-    if #classes == 0 then
-        return List({})
-    end
-    -- dir = dir or M.rootDir()
-    local paths = List({})
-    for _, class in classes:iter() do
-        local rg = Job:new({
-            command = "rg",
-            -- rg -g 'Route.php' --files ./
-            args = { "-g", class .. '.php', "--files", rootDir, "-g", "!vendor/", "-g", "!node_modules/" },
-        })
-        rg:sync()
-        local result = unpack(rg:result()) -- hate the deprecated warning
-        if result ~= nil then
-            result = result:gsub(rootDir, "")
-            result = result:gsub("/", "\\")
-            result = result:gsub(string.lower(prefix), "use " .. prefix)
-            result = result:gsub("%.php", ";")
-            paths:insert(1, result)
-        end
-        -- if result == nil then
-        -- -- finds the missing import but cant get it to work with popup might require coroutine
-        -- -- couldn't make the for loop to wait until popup response.
-        -- M.searchParse(class)
-
-        -- paths:insert(1, ttbl)
-        -- end
-    end
-    return paths
-
-end
 
 
 -- read composer.json
@@ -175,9 +138,6 @@ M.elimateClasses = function(all, usedclss)
     return c
 end
 
-----------------------
---- Sort Imports - sort by import lengtn
-----------------------
 
 M.sort = function(cls)
     local data = { cls:unpack() }
@@ -185,41 +145,74 @@ M.sort = function(cls)
     return data
 end
 
+M.existingClasses = function()
+    local root, bufnr = rt.getRoot("php")
+
+    local query = vim.treesitter.parse_query("php", [[
+        (namespace_use_clause (qualified_name (name) @name))
+        (namespace_use_clause (name) @pname)
+        ]])
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = tq.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
+end
+
+-- (namespace_use_clause (qualified_name (name) @name) ) --gets qualified_name
+
+
 M.getAllClasses = function()
     local bufnr = utils.getBuffer()
     local prefix = M.getComposerNamespace()[2]
-    local clss = M.getClassNames()
 
-    if #clss == nil then return end
-    local phpclss, uclss = M.checkClasses(clss)
+    ---
+    local fclss = M.getClassNames()
+    local eclss = M.existingClasses()
+
+    P(fclss)
+    P(eclss)
+
+    if #fclss == nil then return end
+    local clss = List({})
+    if #eclss >= 1 then
+        fclss = M.elimateClasses(fclss, eclss)
+    end
+
+    local phpclss, uclss = M.checkClasses(fclss)
 
     local ccclss = List({})
-
+    ----
     for _, cls in uclss:iter() do
         local sr = csSearch.CSearch(cls)
-        if sr == nil then
+        if #sr == 0 then
             sr = rgSearch.RSearch(List({ cls }), prefix)
             if sr == nil then
                 vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
-                return
+            else
+                ccclss:insert(1, sr:unpack())
             end
+            if #sr > 1 then
+                local buf_nr = utils.searchBufnr(sr)
+                local ss = utils.searchParse(buf_nr)
+                pop.popup(ss)
+                sr = {}
+            end -- else
+
         end
-        local buf_nr = utils.searchBufnr(sr)
-        local fs = utils.searchParse(buf_nr)
-        fs = unpack(fs)
-        fs = fs:gsub("%\\\\", "\\")
-        fs = "use " .. fs .. ";"
-        ccclss:insert(1, fs)
+        if #sr > 1 then
+            local buf_nr = utils.searchBufnr(sr)
+            local ss = utils.searchParse(buf_nr)
+            pop.popup(ss)
+        end
     end
 
-
-
-
-    -- local searchClss = M.fzfSearch(userclss, prefix)
-
-    local usedclss = M.getUsedClasses()
-    local all = List({}):concat(phpclss, ccclss)
-    local class = M.elimateClasses(all, usedclss)
+    -- local usedclss = M.getUsedClasses()
+    local class = List({}):concat(phpclss, ccclss)
+    -- local class = M.elimateClasses(all, usedclss)
 
     if #class >= 1 then
         local scls = M.sort(class) -- sort
@@ -227,6 +220,5 @@ M.getAllClasses = function()
         vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #scls } }, true, {})
     end
 end
-
 
 return M

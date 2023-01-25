@@ -4,6 +4,7 @@ local rootDir = require("namespace.rootDir").searchRootDir()
 
 local M = {}
 M.RSearch = function(classes, prefix)
+    prefix = prefix or "app"
     if #classes == 0 then
         return List({})
     end
@@ -16,7 +17,7 @@ M.RSearch = function(classes, prefix)
             args = { "-g", class .. '.php', "--files", rootDir, "-g", "!node_modules/" },
         })
         rg:sync()
-        local result = unpack(rg:result()) -- hate the deprecated warning
+        local result = unpack(rg:result())
         if result ~= nil then
             result = result:gsub(rootDir, "")
             result = result:gsub("/", "\\")
@@ -24,13 +25,6 @@ M.RSearch = function(classes, prefix)
             result = result:gsub("%.php", ";")
             paths:insert(1, result)
         end
-        -- if result == nil then
-        -- -- finds the missing import but cant get it to work with popup might require coroutine
-        -- -- couldn't make the for loop to wait until popup response.
-        -- M.searchParse(class)
-
-        -- paths:insert(1, ttbl)
-        -- end
     end
     return paths
 
