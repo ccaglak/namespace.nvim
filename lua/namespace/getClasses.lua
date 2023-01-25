@@ -192,7 +192,8 @@ M.get = function()
     local class = List({}):concat(phpclss, ccclss)
 
     if #class >= 1 then
-        local scls = M.sort(class) -- sort
+        local scls = { class:unpack() }
+        table.sort(scls, function(a, b) return #a < #b end)
         vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, scls)
         vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #scls } }, true, {})
     end
