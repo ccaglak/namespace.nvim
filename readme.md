@@ -44,6 +44,13 @@ Neovim Php Namespace Resolver - tested on mac
 
 -   add options to sort, currently length
 
+## Known bugs
+
+-   When looking for more than one namespace with same name too many popup come up
+-   got to find a way to make popup wait -- maybe coroutines.
+
+
+
 ## Inspired
 
 -   by VSCode Php Namespace Resolver
