@@ -118,5 +118,4 @@ M.existingClasses = function()
     return clsNames
 end
 
-
 return M
