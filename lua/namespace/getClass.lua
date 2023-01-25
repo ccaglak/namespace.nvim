@@ -21,6 +21,7 @@ end
 M.get = function()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
     local used = utils.getUsedClasses()
+
     if native:contains(cWord) then
         cWord = cWord:gsub("%\\\\", "\\")
         cWord = "use " .. cWord .. ";"
@@ -32,9 +33,9 @@ M.get = function()
     local sr = csSearch.CSearch(cWord)
     if #sr == 0 then
         sr = rgSearch.RSearch(List({ cWord }))
-        M.addToBuffer(sr:unpack())
+        M.addToBuffer(sr:unpack()) -- needs popup
         if sr == nil then
-            vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
+            vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
             return
         end
     end

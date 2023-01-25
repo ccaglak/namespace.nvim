@@ -93,13 +93,29 @@ M.searchParse = function(bufnr)
     return searched
 end
 
-
 M.addToBuffer = function(line)
     local bufname = vim.api.nvim_buf_get_name(0)
     local buf = M.getBuffer(bufname)
     vim.api.nvim_buf_set_option(buf, 'modifiable', true)
     vim.api.nvim_buf_set_lines(buf, 1, 1, true, { line })
     vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
+end
+
+M.existingClasses = function()
+    local root, bufnr = rt.getRoot("php")
+
+    local query = vim.treesitter.parse_query("php", [[
+        (namespace_use_clause (qualified_name (name) @name))
+        (namespace_use_clause (name) @pname)
+        ]])
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = tq.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
 end
 
 

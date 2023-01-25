@@ -119,28 +119,6 @@ M.elimateClasses = function(all, usedclss)
     return c
 end
 
-M.sort = function(cls)
-    local data = { cls:unpack() }
-    table.sort(data, function(a, b) return #a < #b end)
-    return data
-end
-
-M.existingClasses = function()
-    local root, bufnr = rt.getRoot("php")
-
-    local query = vim.treesitter.parse_query("php", [[
-        (namespace_use_clause (qualified_name (name) @name))
-        (namespace_use_clause (name) @pname)
-        ]])
-    local clsNames = List({})
-    for n, captures, _ in query:iter_matches(root, bufnr) do
-        local clsName = tq.get_node_text(captures[n], bufnr)
-        if not clsNames:contains(clsName) then
-            clsNames:insert(1, clsName)
-        end
-    end
-    return clsNames
-end
 
 M.get = function()
     local bufnr = utils.getBuffer()
@@ -148,12 +126,14 @@ M.get = function()
 
     ---
     local fclss = M.getClassNames()
-    local eclss = M.existingClasses()
+    local eclss = utils.existingClasses()
 
-    if #fclss == nil then return end
+    if #fclss == nil then return end  -- checks table
     if #eclss >= 1 then
         fclss = M.elimateClasses(fclss, eclss)
     end
+
+
 
     local phpclss, uclss = M.checkClasses(fclss)
     local ccclss = List({})
@@ -176,22 +156,27 @@ M.get = function()
             local buf_nr = utils.searchBufnr(sr)
             local ss = utils.searchParse(buf_nr)
             pop.popup(ss)
-        else
+        elseif #sr == 1 then
             local buf_nr = utils.searchBufnr(sr)
             local ss = utils.searchParse(buf_nr)
             local line = ss:unpack()
             line = line:gsub("%\\\\", "\\")
             line = "use " .. line .. ";"
             ccclss:insert(1, line)
+        else
+            vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
         end
     end
 
     local class = List({}):concat(phpclss, ccclss)
 
     if #class >= 1 then
-        local scls = M.sort(class) -- sort
-        vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, scls)
-        vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #scls } }, true, {})
+
+        local data = { class:unpack() }
+        table.sort(data, function(a, b) return #a < #b end)
+
+        vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, data)
+        vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #data } }, true, {})
     end
 end
 
