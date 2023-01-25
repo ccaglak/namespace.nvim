@@ -9,14 +9,6 @@ local rootDir = require("namespace.rootDir").searchRootDir()
 
 local M = {}
 
-function vim.fs.exists(name)
-    local file, err = io.open(name, "r")
-    if err ~= nil then return false end
-
-    io.close(file)
-    return true
-end
-
 --getClassNames from the buffer
 M.getClassNames = function()
     local root, bufnr = rt.getRoot("php")
@@ -49,63 +41,6 @@ right: (name) @cls
     return clsNames
 end
 
---------------------------------------------
--- searchName
------------------------------------
-M.searchName = function(search)
-    local rg = Job:new({
-        command = 'rg',
-        args = { "/" .. search .. ".php", "vendor/composer/autoload_classmap.php" },
-    })
-    rg:sync()
-    return rg:result()
-end
-
-M.searchBufnr = function(search)
-    local ctbl = List({ "<?php", "return array(" })
-    local result = M.searchName(search)
-    local all = List({}):concat(ctbl, result)
-    all:push(");")
-
-
-    local buf = vim.api.nvim_create_buf(false, false)
-    vim.api.nvim_buf_set_lines(buf, 0, 0, true, { unpack(all) })
-    return buf
-end
-
-
-
-local function getBuffer(filename)
-    local buf_exists = vim.fn.bufexists(filename) ~= 0
-    if buf_exists then
-        return vim.fn.bufnr(filename)
-    end
-    return 0
-end
-
-----------------------------
-M.searchParse = function(class)
-    local searched = List({})
-    -- get class namespace prefix
-    local bufnr = M.searchBufnr(class)
-    local root = rt.getRoot("php", bufnr)
-    local query = vim.treesitter.parse_query(
-        "php",
-        [[
-(array_element_initializer
-  (string (string_value) @sv1)
-   (binary_expression right: (string (string_value) @sv2 ))
-  )
-  ]]
-    )
-    for _, captures, _ in query:iter_matches(root, bufnr) do
-        local ns = tq.get_node_text(captures[1], bufnr)
-        local source = tq.get_node_text(captures[2], bufnr) -- gets the file path
-        searched:insert(1, ns)
-    end
-    vim.api.nvim_buf_delete(bufnr, { force = true })
-    return searched
-end
 -----------------------------------
 --end
 --------------------------------------------
@@ -265,29 +200,5 @@ M.getAllClasses = function()
     end
 end
 
-M.addToBuffer = function(line)
-    local bufname = vim.api.nvim_buf_get_name(0)
-    local buf = getBuffer(bufname)
-    line = line:gsub("%\\\\", "\\")
-    line = "use " .. line .. ";"
-    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-    vim.api.nvim_buf_set_lines(buf, 1, 1, true, { line })
-end
-
-M.getClass = function()
-    local getCursorWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
-    local searched = M.searchParse(getCursorWord)
-    local used = M.getUsedClasses()
-    local fclass = M.elimateClasses(searched, used)
-    if #searched == 1 then
-        M.addToBuffer(fclass:unpack())
-    elseif #searched > 1 then
-        pop.popup(searched)
-    else
-        return
-    end
-    vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #fclass } }, true, {})
-    searched = List({})
-end
 
 return M

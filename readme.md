@@ -1,14 +1,19 @@
 ## Namespace.nvim
 
 Neovim Php Namespace Resolver
-GetAllClasses Doesn't get all classes because cant get the for loop to wait for ui response until i find solution
-use GetClass.
+
+-   :GetAllClasses Doesn't get all classes because cant get the for loop to wait for ui response until i find solution use GetClass. Use :GetAllClasses the for the missing namespaces use
 
 ## Install
 
 ```lua
 
-{'ccaglak/namespace.nvim'}
+{
+    'ccaglak/namespace.nvim',
+    dependencies = {
+        "nvim-lua/plenary.nvim"
+    }
+}
 
 ```
 
@@ -23,7 +28,7 @@ use GetClass.
 ## Requires
 
 -   pleanery.nvim
--   rg
+-   brew install ripgrep
 
 ## Basic Usage
 

@@ -1,6 +1,7 @@
 -- main module file
 local ns = require("namespace.namespace")
 local sort = require("namespace.sort")
+local gc = require("namespace.getClass")
 
 local M = {}
 M.config = {
@@ -21,7 +22,7 @@ M.getAllClasses = function()
 end
 
 M.getClass = function()
-    ns.getClass()
+    gc.getClass()
 end
 
 M.sortClass = function()

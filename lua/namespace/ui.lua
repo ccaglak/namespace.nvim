@@ -57,9 +57,11 @@ local idx = nil
 function M.selectItem()
     idx = vim.fn.line(".")
     local selectedline = selected[idx]
+    selectedline = selectedline:gsub("%\\\\", "\\")
+    selectedline = "use " .. selectedline .. ";"
     close_popup()
     selected = List({})
-    require("namespace.namespace").addToBuffer(selectedline)
+    require("namespace.getClass").addToBuffer(selectedline)
 end
 
 return M
