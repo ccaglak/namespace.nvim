@@ -14,7 +14,7 @@ M.addToBuffer = function(line)
     local bufname = vim.api.nvim_buf_get_name(0)
     local buf = utils.getBuffer(bufname)
     vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-    vim.api.nvim_buf_set_lines(buf, 1, 1, true, { line })
+    vim.api.nvim_buf_set_lines(buf, 3, 3, true, { line })
     vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
 end
 

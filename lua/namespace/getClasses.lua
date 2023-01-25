@@ -28,7 +28,7 @@ M.getClassNames = function()
 (class_constant_access_expression (name) @static (name))
 (simple_parameter type: (union_type (named_type (name) @name)))
 (object_creation_expression (name) @objcreation)
-(use_declaration (name) @use)
+(use_declaration (name) @use )
 ((binary_expression
 left: (class_constant_access_expression)
 right: (name) @cls
@@ -156,7 +156,6 @@ M.get = function()
     end
 
     local phpclss, uclss = M.checkClasses(fclss)
-
     local ccclss = List({})
     ----
     for _, cls in uclss:iter() do
@@ -165,8 +164,6 @@ M.get = function()
             sr = rgSearch.RSearch(List({ cls }), prefix)
             if sr == nil then
                 vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
-            else
-                ccclss:insert(1, sr:unpack())
             end
             if #sr > 1 then
                 local buf_nr = utils.searchBufnr(sr)
@@ -179,6 +176,13 @@ M.get = function()
             local buf_nr = utils.searchBufnr(sr)
             local ss = utils.searchParse(buf_nr)
             pop.popup(ss)
+        else
+            local buf_nr = utils.searchBufnr(sr)
+            local ss = utils.searchParse(buf_nr)
+            local line = ss:unpack()
+            line = line:gsub("%\\\\", "\\")
+            line = "use " .. line .. ";"
+            ccclss:insert(1, line)
         end
     end
 
@@ -186,7 +190,7 @@ M.get = function()
 
     if #class >= 1 then
         local scls = M.sort(class) -- sort
-        vim.api.nvim_buf_set_lines(bufnr, 1, 1, true, scls)
+        vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, scls)
         vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #scls } }, true, {})
     end
 end
