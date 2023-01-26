@@ -1,9 +1,13 @@
 -- borrowd form lazyvim https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/util/init.lua
 
 local M = {}
-M.root_patterns = { ".git", "lua", "vendor", "node_modules" }
-function M.searchRootDir()
-    return vim.fn.expand("%:p:h") .. "/"
+M.searchRootDir = function()
+    local fd = Job:new({
+        command = 'fd',
+        args = { "-a", "composer.json", "-E", "node_modules", "-E", "vendor" },
+    })
+    fd:sync()
+    return unpack(fd:result()):gsub("composer.json", "")
 end
 
 return M
