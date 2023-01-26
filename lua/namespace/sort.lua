@@ -11,12 +11,6 @@ M.namespaces = function()
     local n = {}
     root, bufnr = rt.getRoot('php')
 
-    if vim.bo[bufnr].filetype ~= "php" then
-        require("namespace").reset()
-    end
-
-
-
     local query = vim.treesitter.parse_query("php", [[(namespace_use_declaration) @use]])
     local clsNames = List({})
     for _, captures, me in query:iter_matches(root, bufnr) do

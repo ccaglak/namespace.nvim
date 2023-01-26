@@ -119,11 +119,6 @@ M.elimateClasses = function(all, usedclss)
     return c
 end
 
-M.sort = function(cls)
-    local data = { cls:unpack() }
-    table.sort(data, function(a, b) return #a < #b end)
-    return data
-end
 
 M.existingClasses = function()
     local root, bufnr = rt.getRoot("php")
@@ -154,6 +149,7 @@ M.get = function()
     if #eclss >= 1 then
         fclss = M.elimateClasses(fclss, eclss)
     end
+    if #fclss == nil then return end
 
     local phpclss, uclss = M.checkClasses(fclss)
     local ccclss = List({})
@@ -162,16 +158,16 @@ M.get = function()
         local sr = csSearch.CSearch(cls)
         if #sr == 0 then
             sr = rgSearch.RSearch(List({ cls }), prefix)
+            if sr == nil then
+                vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
+                sr = {}
+            end
             if #sr == 1 then
                 ccclss:insert(1, sr:unpack())
                 sr = {}
             end
             if #sr > 1 then
                 pop.popup(sr)
-                sr = {}
-            end
-            if sr == nil then
-                vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
                 sr = {}
             end
         end
