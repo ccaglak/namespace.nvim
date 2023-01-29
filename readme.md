@@ -49,6 +49,9 @@ Neovim Php Namespace Resolver - tested on mac
 -   When looking for more than one namespace with same name too many popup come up
 -   got to find a way to make popup wait -- maybe coroutines.
 
+## Check Out
+
+Laravel Goto Blade/Components [larago.nvim](https://github.com/ccaglak/larago.nvim).
 
 
 ## Inspired
