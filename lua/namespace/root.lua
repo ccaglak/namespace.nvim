@@ -1,5 +1,5 @@
 -- borrowed form lazyvim https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/util/init.lua
-
+local sep = require('namespace.utils').path_sep()
 local M = {}
 
 M.root_patterns = { ".git", "lua", "vendor", "node_modules" }
@@ -31,7 +31,7 @@ function M.root()
         root = vim.fs.find(M.root_patterns, { path = path, upward = true })[1]
         root = root and vim.fs.dirname(root) or vim.loop.cwd()
     end
-    return root .. "/"
+    return root .. sep
 end
 
 return M

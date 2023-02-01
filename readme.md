@@ -8,7 +8,7 @@ Neovim Php Namespace Resolver - tested on mac
 
 ```lua
 
-{
+{  -- lazy
     'ccaglak/namespace.nvim',
     dependencies = {
         "nvim-lua/plenary.nvim"
@@ -16,8 +16,18 @@ Neovim Php Namespace Resolver - tested on mac
 }
 
 ```
+```lua
 
-## Keymaps -- plugin doesn't set any keymaps
+{  -- packer
+    'ccaglak/namespace.nvim',
+    requires = {
+        "nvim-lua/plenary.nvim"
+    }
+}
+
+```
+
+## Keymaps -- No default keymaps
 
 ```vim
     vim.keymap.set("n", "<leader>la", "<cmd>GetAllClasses<cr>")
@@ -28,6 +38,7 @@ Neovim Php Namespace Resolver - tested on mac
 ## Requires
 
 -   pleanery.nvim
+-   nvim-treesitter
 -   brew install ripgrep
 
 ## Basic Usage
@@ -42,11 +53,11 @@ Neovim Php Namespace Resolver - tested on mac
 
 -   AutoNamespace generator
 
--   add options to sort, currently length
+-   Option how to sort
 
 ## Known bugs
 
--   imports current file class -- easy fix
+-   Let me know if you have any edge cases
 
 ## Check Out
 

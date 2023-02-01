@@ -4,9 +4,6 @@ local rt   = require("namespace.root").root()
 
 local M = {}
 
-
-
-
 M.get_root = function(language, bufnr)
     bufnr = bufnr or vim.api.nvim_get_current_buf()
     local parser = vim.treesitter.get_parser(bufnr, language, {})

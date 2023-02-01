@@ -2,11 +2,13 @@ local List = require("plenary.collections.py_list")
 local Job = require("plenary.job")
 local rt = require("namespace.root").root()
 
+local sep = require('namespace.utils').path_sep()
+
 local M = {}
 M.CSearch = function(search)
     local rg = Job:new({
         command = 'rg',
-        args = { "/" .. search .. ".php", "vendor/composer/autoload_classmap.php" },
+        args = { sep .. search .. ".php", "vendor" .. sep .. "composer" .. sep .. "autoload_classmap.php" },
     })
     rg:sync()
     return rg:result()
