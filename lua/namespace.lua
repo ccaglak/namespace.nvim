@@ -1,5 +1,5 @@
 -- main module file
-local ns = require("lua.namespace.getClasses")
+local ns = require("namespace.getClasses")
 local sort = require("namespace.sort")
 local gc = require("namespace.getClass")
 

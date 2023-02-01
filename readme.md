@@ -46,8 +46,7 @@ Neovim Php Namespace Resolver - tested on mac
 
 ## Known bugs
 
--   When looking for more than one namespace with same name too many popup come up
--   got to find a way to make popup wait -- maybe coroutines.
+-   imports current file class -- easy fix
 
 ## Check Out
 

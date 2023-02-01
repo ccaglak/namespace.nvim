@@ -1,58 +1,57 @@
 local List = require("plenary.collections.py_list")
-local tq = require("vim.treesitter.query")
-local rt = require("namespace.root")
-local pop = require("namespace.ui")
-local csSearch = require("namespace.csSearch")
-local rgSearch = require("namespace.rgSearch")
+local pop = require("namespace.popui")
+local search = require("namespace.search")
 local utils = require("namespace.utils")
+local tree = require("namespace.treesitter")
 local native = require("namespace.classes")
 
 local M = {}
 
-
-M.addToBuffer = function(line)
-    local bufname = vim.api.nvim_buf_get_name(0)
-    local buf = utils.getBuffer(bufname)
-    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-    vim.api.nvim_buf_set_lines(buf, 3, 3, true, { line })
+M.add_to_buffer = function(line, bufnr)
+    bufnr = bufnr or utils.get_bufnr()
+    vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, { line })
     vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
 end
 
 M.get = function()
+    local prefix = tree.namespace_prefix()
+    local mbufnr = utils.get_bufnr()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
-    local used = utils.getUsedClasses()
+    local used = tree.get_all_namespaces()
 
     if native:contains(cWord) then
         cWord = cWord:gsub("%\\\\", "\\")
         cWord = "use " .. cWord .. ";"
         if not used:contains(cWord) then
-            M.addToBuffer(cWord)
+            M.add_to_buffer(cWord)
         end
         return
     end
-    local sr = csSearch.CSearch(cWord)
+    local sr = search.CSearch(cWord)
     if #sr == 0 then
-        sr = rgSearch.RSearch(List({ cWord }))
-        M.addToBuffer(sr:unpack()) -- needs popup
+        sr = search.RSearch(List({ cWord }), prefix)
         if sr == nil then
-            vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
-            return
+            vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
+        elseif #sr == 1 then
+            M.add_to_buffer(sr:unpack(), mbufnr)
+        elseif #sr > 1 then
+            pop.popup(sr, mbufnr)
         end
     end
-    local bufnr = utils.searchBufnr(sr)
-    local searched = utils.searchParse(bufnr)
+    local bufnr = tree.create_search_bufnr(sr)
+    local searched = tree.search_parse(bufnr)
 
-    local fclass = utils.elimateClasses(searched, used)
+    local fclass = utils.class_filter(searched, used)
     if #searched == 1 then
         local line = fclass:unpack()
         line = line:gsub("%\\\\", "\\")
         line = "use " .. line .. ";"
         if not used:contains(line) then
-            M.addToBuffer(line)
+            M.add_to_buffer(line, mbufnr)
             return
         end
     elseif #searched > 1 then
-        pop.popup(searched)
+        pop.popup(searched, mbufnr)
         return
     end
 

@@ -1,22 +1,18 @@
--- :GetAllClasses
------------------
+local tq     = require("vim.treesitter.query")
+local List   = require("plenary.collections.py_list")
+local pop    = require("namespace.popui")
+local tree   = require("namespace.treesitter")
+local rt     = require("namespace.root").root() -- root directory maybe it should be more clear
+local utils  = require("namespace.utils")
+local search = require("namespace.search")
 
-local tq       = require("vim.treesitter.query")
-local List     = require("plenary.collections.py_list")
-local pop      = require("namespace.ui")
-local Job      = require("plenary.job")
-local pclss    = require("namespace.classes")
-local rt       = require("namespace.root")
-local rootDir  = require("namespace.rootDir").searchRootDir()
-local utils    = require("namespace.utils")
-local csSearch = require("namespace.csSearch")
-local rgSearch = require("namespace.rgSearch")
 
 local M = {}
 
---getClassNames from the buffer
-M.getClassNames = function()
-    local root, bufnr = rt.getRoot("php")
+--get_class_names from the buffer
+-- BUG -- gets current class name in the from the union_type
+M.get_class_names = function()
+    local root, bufnr = tree.get_root("php")
 
     local query = vim.treesitter.parse_query(
         "php",
@@ -46,82 +42,9 @@ right: (name) @cls
     return clsNames
 end
 
--- read composer.json
--- creates buffer
-M.newBufnr = function(file)
-    local ctbl = {}
-    for line in io.lines(rootDir .. file) do
-        table.insert(ctbl, line)
-    end
 
-    local buf = vim.api.nvim_create_buf(false, false)
-    vim.api.nvim_buf_set_lines(buf, 1, 1, true, ctbl)
-    return buf
-end
-
-M.getComposerNamespace = function()
-    -- get class namespace prefix
-    local bufnr = M.newBufnr('composer.json')
-    local root = rt.getRoot("json", bufnr)
-    local query = vim.treesitter.parse_query(
-        "json",
-        [[
-  (pair
-      key: (string (string_content) @psr) (#eq? @psr "psr-4")
-      value: (object (pair
-          key: (string (string_content) @prefix)
-          value: (string (string_content) @src_path (#match? @src_path "src|app|App/|Src/"))
-      ))
-  ) @a
-  ]]
-    )
-    local composer = List({})
-    for _, captures, _ in query:iter_matches(root, bufnr) do
-        local prefix = tq.get_node_text(captures[2], bufnr)
-        local source = tq.get_node_text(captures[3], bufnr)
-        prefix = prefix:gsub("%\\", "")
-        source = source:gsub("/", "")
-        composer:insert(1, prefix)
-        composer:insert(1, source)
-    end
-    vim.api.nvim_buf_delete(bufnr, { force = true })
-
-    return composer
-end
-
-----------------------
---- check if class is native php class return user and php classes
-----------------------
-M.checkClasses = function(clss)
-    local pcls = List({}) -- php classes
-    local ucls = List({}) -- user classes
-
-    for _, value in clss:iter() do
-        if pclss:contains(value) then
-            pcls:insert(1, "use " .. value .. ";")
-        else
-            ucls:insert(1, value)
-        end
-    end
-    return pcls, ucls
-end
-
-----------------------
--- Delete existint imports from table-
-----------------------
-M.elimateClasses = function(all, usedclss)
-    local c = List({})
-    for _, value in all:iter() do
-        if not usedclss:contains(value) then
-            c:insert(1, value)
-        end
-    end
-    return c
-end
-
-
-M.existingClasses = function()
-    local root, bufnr = rt.getRoot("php")
+M.namespaces_in_buffer = function()
+    local root, bufnr = tree.get_root("php")
 
     local query = vim.treesitter.parse_query("php", [[
         (namespace_use_clause (qualified_name (name) @name))
@@ -138,51 +61,48 @@ M.existingClasses = function()
 end
 
 M.get = function()
-    local bufnr = utils.getBuffer()
-    local prefix = M.getComposerNamespace()[2]
-
+    local bufnr = utils.get_bufnr()
+    local prefix = tree.namespace_prefix()
     ---
-    local fclss = M.getClassNames()
-    local eclss = M.existingClasses()
+    local fclss = M.get_class_names()
+    local eclss = M.namespaces_in_buffer()
 
-    if #fclss == nil then return end
+    if #fclss == 0 then return end -- whole block could be a function simplify
     if #eclss >= 1 then
-        fclss = M.elimateClasses(fclss, eclss)
+        fclss = utils.class_filter(fclss, eclss)
     end
-    if #fclss == nil then return end
+    if #fclss == 0 then return end
 
-    local phpclss, uclss = M.checkClasses(fclss)
+    local phpclss, uclss = utils.class_check(fclss)
     local ccclss = List({})
     ----
     for _, cls in uclss:iter() do
-        local sr = csSearch.CSearch(cls)
+        local sr = search.CSearch(cls)
         if #sr == 0 then
-            sr = rgSearch.RSearch(List({ cls }), prefix)
+            sr = search.RSearch(List({ cls }), prefix)
             if sr == nil then
                 vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
-                sr = {}
-            end
-            if #sr == 1 then
+            elseif #sr == 1 then
                 ccclss:insert(1, sr:unpack())
-                sr = {}
+            elseif #sr > 1 then
+                pop.popup(sr, bufnr)
             end
-            if #sr > 1 then
-                pop.popup(sr)
-                sr = {}
-            end
+            goto continue
         end
         if #sr > 1 then
-            local buf_nr = utils.searchBufnr(sr)
-            local ss = utils.searchParse(buf_nr)
-            pop.popup(ss)
+            local buf_nr = tree.create_search_bufnr(sr)
+            local ss = tree.search_parse(buf_nr)
+            pop.popup(ss, bufnr)
+
         elseif #sr == 1 then
-            local buf_nr = utils.searchBufnr(sr)
-            local ss = utils.searchParse(buf_nr)
+            local buf_nr = tree.create_search_bufnr(sr)
+            local ss = tree.search_parse(buf_nr)
             local line = ss:unpack()
             line = line:gsub("%\\\\", "\\")
             line = "use " .. line .. ";"
             ccclss:insert(1, line)
         end
+        ::continue::
     end
 
     local class = List({}):concat(phpclss, ccclss)
@@ -191,7 +111,6 @@ M.get = function()
         local scls = { class:unpack() }
         table.sort(scls, function(a, b) return #a < #b end)
         vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, scls)
-        vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. #scls } }, true, {})
     end
 end
 
