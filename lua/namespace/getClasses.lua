@@ -42,6 +42,19 @@ right: (name) @cls
     return clsNames
 end
 
+M.get_file_class = function()
+    local root, bufnr = tree.get_root("php")
+
+    local query = vim.treesitter.parse_query("php", [[(class_declaration name:(name) @name)]])
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = tq.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
+end
 
 M.namespaces_in_buffer = function()
     local root, bufnr = tree.get_root("php")
@@ -65,7 +78,9 @@ M.get = function()
     local prefix = tree.namespace_prefix()
     ---
     local fclss = M.get_class_names()
+    local local_class = M.get_file_class() -- get the local_class name
     local eclss = M.namespaces_in_buffer()
+    eclss:insert(1, local_class:unpack())
 
     if #fclss == 0 then return end -- whole block could be a function simplify
     if #eclss >= 1 then
