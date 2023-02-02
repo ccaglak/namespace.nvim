@@ -52,6 +52,43 @@ M.class_filter = function(all, usedclss)
     return c
 end
 
+----------------------
+-- Get the line number to insert new use statements based on the current structure of the file
+----------------------
+M.get_insertion_point = function(bufnr)
+    bufnr = bufnr or M.get_bufnr()
+    local content = vim.api.nvim_buf_get_lines(bufnr, 0, vim.api.nvim_buf_line_count(bufnr), false)
 
+    -- default to line 3
+    local insertion_point = 3
+    local namespace_line_number = nil
+    local last_use_statement_line_number = nil
+
+
+    for i, line in ipairs(content) do
+        if line:find("^namespace") then
+            namespace_line_number = i
+        end
+
+        if line:find("^use") then
+            last_use_statement_line_number = i
+        end
+    end
+
+    if namespace_line_number then
+        if not last_use_statement_line_number then
+            -- insert an empty line after the namespace
+            vim.api.nvim_buf_set_lines(bufnr, namespace_line_number, namespace_line_number, true, { "" })
+        end
+        insertion_point = namespace_line_number + 1
+    end
+
+    if last_use_statement_line_number then
+        insertion_point = last_use_statement_line_number
+    end
+
+
+    return insertion_point
+end
 
 return M
