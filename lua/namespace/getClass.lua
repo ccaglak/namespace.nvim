@@ -19,7 +19,10 @@ M.get = function()
     local prefix = tree.namespace_prefix()
     local mbufnr = utils.get_bufnr()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
-    local used = tree.get_all_namespaces()
+    local used = tree.namespaces_in_buffer() --  class
+
+    local filtered_class = utils.class_filter(List({ cWord }), used) --
+    if #filtered_class == 0 then return end
 
     if native:contains(cWord) then
         cWord = cWord:gsub("%\\\\", "\\")
@@ -29,6 +32,7 @@ M.get = function()
         end
         return
     end
+
     local sr = search.CSearch(cWord)
     if #sr == 0 then
         sr = search.RSearch(List({ cWord }), prefix)
@@ -41,11 +45,10 @@ M.get = function()
         end
     end
     local bufnr = tree.create_search_bufnr(sr)
-    local searched = tree.search_parse(bufnr)
+    local searched = tree.search_parse(bufnr) -- return namespace
 
-    local fclass = utils.class_filter(searched, used)
     if #searched == 1 then
-        local line = fclass:unpack()
+        local line = searched:unpack()
         line = line:gsub("%\\\\", "\\")
         line = "use " .. line .. ";"
         if not used:contains(line) then

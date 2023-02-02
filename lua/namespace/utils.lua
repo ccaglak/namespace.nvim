@@ -12,10 +12,12 @@ M.absolute = function()
     return vim.loop.cwd()
 end
 
-
-M.spliter = function(path, sepa)
-    sepa = sepa or "."
-    local format = string.format("([^%s]+)", sepa)
+----------------------
+--- splits string by separater sep
+----------------------
+M.spliter = function(path, sep)
+    sep = sep or "."
+    local format = string.format("([^%s]+)", sep)
     local t = {}
     for str in string.gmatch(path, format) do
         table.insert(t, str)
@@ -63,7 +65,8 @@ M.class_filter = function(all, usedclss)
 end
 
 ----------------------
--- Get the line number to insert new use statements based on the current structure of the file
+-- Get the line number to insert new use statements
+-- based on the current structure of the file
 ----------------------
 M.get_insertion_point = function(bufnr)
     bufnr = bufnr or M.get_bufnr()
