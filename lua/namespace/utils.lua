@@ -13,6 +13,16 @@ M.absolute = function()
 end
 
 
+M.spliter = function(path, sepa)
+    sepa = sepa or "."
+    local format = string.format("([^%s]+)", sepa)
+    local t = {}
+    for str in string.gmatch(path, format) do
+        table.insert(t, str)
+    end
+    return t
+end
+
 M.get_bufnr = function(filename)
     filename = filename or vim.api.nvim_buf_get_name(0)
     local buf_exists = vim.fn.bufexists(filename) ~= 0

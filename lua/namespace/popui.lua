@@ -1,6 +1,7 @@
 local popup = require('plenary.popup')
 local List  = require("plenary.collections.py_list")
 local bf    = require("namespace.buffer")
+local utils = require('namespace.utils')
 
 local M = {}
 local popup_atts = {} -- stores popup buffer, winid
@@ -23,7 +24,9 @@ function M.pop(rnamespaces)
     local height = 10
     local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
-    local title = "PHPNamespace " -- add the namespace
+    local ns = utils.spliter(rnamespaces[1],'\\')  -- namespace name 
+
+    local title = "PHPNamespace | " .. ns[#ns].. " |"-- add the namespace
 
     local win, _ = popup.create(buf_nr, {
         line = math.floor(((vim.o.lines - height) / 2) - 1),

@@ -77,10 +77,12 @@ M.get = function()
     local bufnr = utils.get_bufnr()
     local prefix = tree.namespace_prefix()
     ---
-    local fclss = M.get_class_names()
+    local fclss = M.get_class_names() -- gets the class names
     local local_class = M.get_file_class() -- get the local_class name
-    local eclss = M.namespaces_in_buffer()
-    eclss:insert(1, local_class:unpack()) -- insert here to to get it filtered
+    local eclss = M.namespaces_in_buffer() --  class
+    if #local_class ~= 0 then -- checks whether there is class in the file
+        eclss:insert(1, local_class:unpack()) -- insert here to to get it filtered
+    end
 
     if #fclss == 0 then return end -- whole block could be a function simplify
     if #eclss >= 1 then
