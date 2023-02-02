@@ -98,7 +98,10 @@ M.get = function()
             if sr == nil then
                 vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
             elseif #sr == 1 then
-                ccclss:insert(1, sr:unpack())
+                local line = sr:unpack()
+                line = line:gsub("%\\\\", "\\")
+                line = "use " .. line .. ";"
+                ccclss:insert(1, line)
             elseif #sr > 1 then
                 pop.popup(sr, bufnr)
             end
@@ -125,7 +128,8 @@ M.get = function()
     if #class >= 1 then
         local scls = { class:unpack() }
         table.sort(scls, function(a, b) return #a < #b end)
-        vim.api.nvim_buf_set_lines(bufnr, 3, 3, true, scls)
+        local insertion_point = utils.get_insertion_point(bufnr)
+        vim.api.nvim_buf_set_lines(bufnr, insertion_point, insertion_point, true, scls)
     end
 end
 

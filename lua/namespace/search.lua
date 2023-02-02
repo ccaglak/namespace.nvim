@@ -14,6 +14,30 @@ M.CSearch = function(search)
     return rg:result()
 end
 
+M.get_file_namespace = function(path)
+    function file_exists(file)
+      local f = io.open(file, "rb")
+      if f then f:close() end
+      return f ~= nil
+    end
+
+    function lines_from(file)
+      if not file_exists(file) then return {} end
+      local lines = {}
+      for line in io.lines(file) do
+        lines[#lines + 1] = line
+      end
+      return lines
+    end
+
+    local lines = lines_from(path)
+    for i, line in pairs(lines) do
+        if line:find("^namespace") then
+            return line:match("namespace (.*);")
+        end
+    end
+end
+
 M.RSearch = function(classes, prefix)
     prefix = prefix or { "app", "App" }
 
@@ -21,7 +45,7 @@ M.RSearch = function(classes, prefix)
         return List({})
     end
     -- dir = dir or M.rootDir()
-    local paths = List({})
+    local namespaces = List({})
     for _, class in classes:iter() do
         local rg = Job:new({
             command = "rg",
@@ -31,11 +55,12 @@ M.RSearch = function(classes, prefix)
         rg:sync()
         local result = unpack(rg:result())
         if result ~= nil then
-            paths:insert(1, result)
+            local namespace = M.get_file_namespace(result) .. "\\" .. class
+            table.insert(namespaces, namespace)
         end
     end
-    return paths
 
+    return namespaces
 end
 
 M._modify = function(result, prefix)
