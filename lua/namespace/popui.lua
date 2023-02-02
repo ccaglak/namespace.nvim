@@ -24,9 +24,7 @@ function M.pop(rnamespaces)
     local height = 10
     local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
-    local ns = utils.spliter(rnamespaces[1],'\\')  -- namespace name 
-
-    local title = "PHPNamespace | " .. ns[#ns].. " |"-- add the namespace
+    local title = "PHPNamespace"
 
     local win, _ = popup.create(buf_nr, {
         line = math.floor(((vim.o.lines - height) / 2) - 1),
