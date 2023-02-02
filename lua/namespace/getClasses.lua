@@ -10,7 +10,6 @@ local search = require("namespace.search")
 local M = {}
 
 --get_class_names from the buffer
--- BUG -- gets current class name in the from the union_type
 M.get_class_names = function()
     local root, bufnr = tree.get_root("php")
 
@@ -74,13 +73,14 @@ M.namespaces_in_buffer = function()
 end
 
 M.get = function()
+    if vim.bo.filetype ~= "php" then return end
     local bufnr = utils.get_bufnr()
     local prefix = tree.namespace_prefix()
     ---
     local fclss = M.get_class_names()
     local local_class = M.get_file_class() -- get the local_class name
     local eclss = M.namespaces_in_buffer()
-    eclss:insert(1, local_class:unpack())
+    eclss:insert(1, local_class:unpack()) -- insert here to to get it filtered
 
     if #fclss == 0 then return end -- whole block could be a function simplify
     if #eclss >= 1 then
@@ -97,6 +97,7 @@ M.get = function()
             sr = search.RSearch(List({ cls }), prefix)
             if sr == nil then
                 vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
+                return
             elseif #sr == 1 then
                 local line = sr:unpack()
                 line = line:gsub("%\\\\", "\\")

@@ -29,6 +29,7 @@ M.namespaces = function()
 end
 
 M.sort = function()
+    if vim.bo.filetype ~= "php" then return end
     local namespaces, line = M.namespaces()
     vim.api.nvim_buf_set_lines(bufnr, line[1], line[2] + 1, true, {})
     table.sort(namespaces, function(a, b) return #a < #b end)

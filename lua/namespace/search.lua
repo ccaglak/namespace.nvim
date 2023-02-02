@@ -5,6 +5,8 @@ local rt = require("namespace.root").root()
 local sep = require('namespace.utils').path_sep()
 
 local M = {}
+
+-- search in composer autoload_classmap
 M.CSearch = function(search)
     local rg = Job:new({
         command = 'rg',
@@ -14,20 +16,21 @@ M.CSearch = function(search)
     return rg:result()
 end
 
+-- loads the file to get the namespace,
 M.get_file_namespace = function(path)
-    function file_exists(file)
-      local f = io.open(file, "rb")
-      if f then f:close() end
-      return f ~= nil
+    local function file_exists(file)
+        local f = io.open(file, "rb")
+        if f then f:close() end
+        return f ~= nil
     end
 
-    function lines_from(file)
-      if not file_exists(file) then return {} end
-      local lines = {}
-      for line in io.lines(file) do
-        lines[#lines + 1] = line
-      end
-      return lines
+    local function lines_from(file)
+        if not file_exists(file) then return {} end
+        local lines = {}
+        for line in io.lines(file) do
+            lines[#lines + 1] = line
+        end
+        return lines
     end
 
     local lines = lines_from(path)
@@ -38,6 +41,7 @@ M.get_file_namespace = function(path)
     end
 end
 
+-- search in root directory
 M.RSearch = function(classes, prefix)
     prefix = prefix or { "app", "App" }
 

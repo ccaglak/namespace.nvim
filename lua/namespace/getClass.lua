@@ -15,6 +15,7 @@ M.add_to_buffer = function(line, bufnr)
 end
 
 M.get = function()
+    if vim.bo.filetype ~= "php" then return end
     local prefix = tree.namespace_prefix()
     local mbufnr = utils.get_bufnr()
     local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
