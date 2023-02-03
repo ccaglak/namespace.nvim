@@ -17,28 +17,20 @@ M.CSearch = function(search)
 end
 
 -- loads the file to get the namespace,
-M.get_file_namespace = function(path)
-    local function file_exists(file)
-        local f = io.open(file, "rb")
+M.get_file_namespace = function(file)
+    local function file_exists(fl)
+        local f = io.open(fl, "rb")
         if f then f:close() end
         return f ~= nil
     end
 
-    local function lines_from(file)
-        if not file_exists(file) then return {} end
-        local lines = {}
-        for line in io.lines(file) do
-            lines[#lines + 1] = line
-        end
-        return lines
-    end
-
-    local lines = lines_from(path)
-    for i, line in pairs(lines) do
+    if not file_exists(file) then return {} end
+    for line in io.lines(file) do
         if line:find("^namespace") then
             return line:match("namespace (.*);")
         end
     end
+
 end
 
 -- search in root directory
@@ -67,10 +59,4 @@ M.RSearch = function(classes, prefix)
     return namespaces
 end
 
-M._modify = function(result, prefix)
-    result = result:gsub(rt, "")
-    result = result:gsub("/", "\\")
-    result = result:gsub(string.lower(prefix[1]), "use " .. prefix[2])
-    result = result:gsub("%.php", ";")
-end
 return M
