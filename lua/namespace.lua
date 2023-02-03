@@ -4,20 +4,16 @@ local sort = require("namespace.sort")
 local gc = require("namespace.getClass")
 
 local M = {}
-M.getAllClasses = function()
-    ns.getAllClasses()
+M.get_classes = function()
+    ns.get()
 end
 
-M.getClass = function()
-    gc.getClass()
+M.get_class = function()
+    gc.get()
 end
 
-M.sortClass = function()
+M.sort_classes = function()
     sort.sort()
-end
-
-function M.reset()
-    require("plenary.reload").reload_module("namespace")
 end
 
 return M

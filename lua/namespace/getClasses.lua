@@ -41,6 +41,7 @@ right: (name) @cls
     return clsNames
 end
 
+-- gets the main class
 M.get_file_class = function()
     local root, bufnr = tree.get_root("php")
 

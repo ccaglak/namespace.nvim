@@ -1,7 +1,6 @@
 local List = require("plenary.collections.py_list")
 local Job = require("plenary.job")
 local rt = require("namespace.root").root()
-
 local sep = require('namespace.utils').path_sep()
 
 local M = {}
