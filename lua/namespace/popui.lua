@@ -1,7 +1,6 @@
 local popup = require('plenary.popup')
 local List  = require("plenary.collections.py_list")
 local bf    = require("namespace.buffer")
-local utils = require('namespace.utils')
 
 local M = {}
 local popup_atts = {} -- stores popup buffer, winid

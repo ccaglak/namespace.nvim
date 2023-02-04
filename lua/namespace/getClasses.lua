@@ -2,10 +2,8 @@ local tq     = require("vim.treesitter.query")
 local List   = require("plenary.collections.py_list")
 local pop    = require("namespace.popui")
 local tree   = require("namespace.treesitter")
-local rt     = require("namespace.root").root() -- root directory maybe it should be more clear
 local utils  = require("namespace.utils")
 local search = require("namespace.search")
-
 
 local M = {}
 
@@ -82,7 +80,7 @@ M.get = function()
     local local_class = M.get_file_class() -- get the local_class name
     local eclss = M.namespaces_in_buffer() --  class
     if #local_class ~= 0 then -- checks whether there is class in the file
-        eclss:insert(1, local_class:unpack()) -- insert here to to get it filtered
+        eclss:insert(1, local_class:unpack()) -- inserts local_class here to to get it filtered
     end
 
     if #fclss == 0 then return end -- whole block could be a function simplify
@@ -112,13 +110,11 @@ M.get = function()
             goto continue
         end
         if #sr > 1 then
-            local buf_nr = tree.create_search_bufnr(sr)
-            local ss = tree.search_parse(buf_nr)
+            local ss = tree.search_parse(sr)
             pop.popup(ss, bufnr)
 
         elseif #sr == 1 then
-            local buf_nr = tree.create_search_bufnr(sr)
-            local ss = tree.search_parse(buf_nr)
+            local ss = tree.search_parse(sr)
             local line = ss:unpack()
             line = line:gsub("%\\\\", "\\")
             line = "use " .. line .. ";"
@@ -131,7 +127,7 @@ M.get = function()
 
     if #class >= 1 then
         local scls = { class:unpack() }
-        table.sort(scls, function(a, b) return #a < #b end)
+        -- table.sort(scls, function(a, b) return #a < #b end)
         local insertion_point = utils.get_insertion_point(bufnr)
         vim.api.nvim_buf_set_lines(bufnr, insertion_point, insertion_point, true, scls)
     end

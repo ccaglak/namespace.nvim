@@ -4,15 +4,9 @@ local search = require("namespace.search")
 local utils = require("namespace.utils")
 local tree = require("namespace.treesitter")
 local native = require("namespace.classes")
+local bf = require("namespace.buffer")
 
 local M = {}
-
-M.add_to_buffer = function(line, bufnr)
-    bufnr = bufnr or utils.get_bufnr()
-    local insertion_point = utils.get_insertion_point()
-    vim.api.nvim_buf_set_lines(bufnr, insertion_point, insertion_point, true, { line })
-    vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
-end
 
 M.get = function()
     if vim.bo.filetype ~= "php" then return end
@@ -39,20 +33,20 @@ M.get = function()
         if sr == nil then
             vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
         elseif #sr == 1 then
-            M.add_to_buffer(sr:unpack(), mbufnr)
+            bf.add_to_buffer(sr:unpack(), mbufnr)
         elseif #sr > 1 then
             pop.popup(sr, mbufnr)
         end
     end
-    local bufnr = tree.create_search_bufnr(sr)
-    local searched = tree.search_parse(bufnr) -- return namespace
+
+    local searched = tree.search_parse(sr) -- return namespace
 
     if #searched == 1 then
         local line = searched:unpack()
         line = line:gsub("%\\\\", "\\")
         line = "use " .. line .. ";"
         if not used:contains(line) then
-            M.add_to_buffer(line, mbufnr)
+            bf.add_to_buffer(line, mbufnr)
             return
         end
     elseif #searched > 1 then

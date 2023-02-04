@@ -43,9 +43,9 @@ M.namespaces_in_buffer = function()
     return clsNames
 end
 
-M.search_parse = function(bufnr)
+M.search_parse = function(sr)
     local searched = List({})
-    -- get class namespace prefix
+    local bufnr = M.create_search_bufnr(sr)
     local root = M.get_root("php", bufnr)
     local query = vim.treesitter.parse_query(
         "php",
