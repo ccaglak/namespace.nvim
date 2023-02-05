@@ -2,11 +2,16 @@ local popup = require('plenary.popup')
 local List  = require("plenary.collections.py_list")
 local bf    = require("namespace.buffer")
 
+
 local M = {}
 local popup_atts = {} -- stores popup buffer, winid
 local namespaces = {}
 local mbufnr -- main (current) buffer -- because of popups it interferes
 
+
+-- work around a bug 1 which interferes which popup to close
+-- existing bug when there many popups everything gets messed up
+-- requires a fix
 function M.popup(ret_namespaces, buf)
     mbufnr = buf
     local rnamespaces = { ret_namespaces:unpack() }

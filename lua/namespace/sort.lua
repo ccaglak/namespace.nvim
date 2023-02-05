@@ -33,7 +33,7 @@ M.sort = function()
     local namespaces, line = M.namespaces()
     vim.api.nvim_buf_set_lines(bufnr, line[1], line[2] + 1, true, {})
     table.sort(namespaces, function(a, b) return #a < #b end)
-    vim.api.nvim_buf_set_lines(bufnr, line[1], line[1], true, { namespaces:unpack() })
+    vim.api.nvim_buf_set_lines(bufnr, line[1] + 1, line[1] + 1, true, { namespaces:unpack() })
 end
 
 

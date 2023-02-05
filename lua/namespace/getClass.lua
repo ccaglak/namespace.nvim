@@ -8,11 +8,11 @@ local bf = require("namespace.buffer")
 
 local M = {}
 
-M.get = function()
-    if vim.bo.filetype ~= "php" then return end
+M.get = function(cWord, mbufnr)
+    mbufnr = mbufnr or utils.get_bufnr()
+    if vim.api.nvim_buf_get_option(mbufnr, "filetype") ~= "php" then return end
     local prefix = tree.namespace_prefix()
-    local mbufnr = utils.get_bufnr()
-    local cWord = vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
+    cWord = cWord or vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
     local used = tree.namespaces_in_buffer() --  class
 
     local filtered_class = utils.class_filter(List({ cWord }), used) --
@@ -24,7 +24,6 @@ M.get = function()
         if not used:contains(cWord) then
             M.add_to_buffer(cWord)
         end
-        return
     end
 
     local sr = search.CSearch(cWord)
@@ -47,11 +46,9 @@ M.get = function()
         line = "use " .. line .. ";"
         if not used:contains(line) then
             bf.add_to_buffer(line, mbufnr)
-            return
         end
     elseif #searched > 1 then
         pop.popup(searched, mbufnr)
-        return
     end
 
     -- vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})

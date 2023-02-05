@@ -4,8 +4,10 @@ local pop    = require("namespace.popui")
 local tree   = require("namespace.treesitter")
 local utils  = require("namespace.utils")
 local search = require("namespace.search")
+local gcls   = require("namespace.getClass")
 
-local M = {}
+local co = coroutine
+local M  = {}
 
 --get_class_names from the buffer
 M.get_class_names = function()
@@ -72,13 +74,12 @@ M.namespaces_in_buffer = function()
 end
 
 M.get = function()
-    if vim.bo.filetype ~= "php" then return end
-    local bufnr = utils.get_bufnr()
-    local prefix = tree.namespace_prefix()
-    ---
+    if vim.api.nvim_buf_get_option(0, "filetype") ~= "php" then return end
+    local mbufnr = utils.get_bufnr()
+
     local fclss = M.get_class_names() -- gets the class names
     local local_class = M.get_file_class() -- get the local_class name
-    local eclss = M.namespaces_in_buffer() --  class
+    local eclss = M.namespaces_in_buffer() --  namespace in buffer
     if #local_class ~= 0 then -- checks whether there is class in the file
         eclss:insert(1, local_class:unpack()) -- inserts local_class here to to get it filtered
     end
@@ -88,49 +89,11 @@ M.get = function()
         fclss = utils.class_filter(fclss, eclss)
     end
     if #fclss == 0 then return end
-
-    local phpclss, uclss = utils.class_check(fclss)
-    local ccclss = List({})
     ----
-    for _, cls in uclss:iter() do
-        local sr = search.CSearch(cls)
-        if #sr == 0 then
-            sr = search.RSearch(List({ cls }), prefix)
-            if sr == nil then
-                vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
-                return
-            elseif #sr == 1 then
-                local line = sr:unpack()
-                line = line:gsub("%\\\\", "\\")
-                line = "use " .. line .. ";"
-                ccclss:insert(1, line)
-            elseif #sr > 1 then
-                pop.popup(sr, bufnr)
-            end
-            goto continue
-        end
-        if #sr > 1 then
-            local ss = tree.search_parse(sr)
-            pop.popup(ss, bufnr)
-
-        elseif #sr == 1 then
-            local ss = tree.search_parse(sr)
-            local line = ss:unpack()
-            line = line:gsub("%\\\\", "\\")
-            line = "use " .. line .. ";"
-            ccclss:insert(1, line)
-        end
-        ::continue::
+    for _, cls in fclss:iter() do
+        gcls.get(cls, mbufnr) -- get_class
     end
 
-    local class = List({}):concat(phpclss, ccclss)
-
-    if #class >= 1 then
-        local scls = { class:unpack() }
-        -- table.sort(scls, function(a, b) return #a < #b end)
-        local insertion_point = utils.get_insertion_point(bufnr)
-        vim.api.nvim_buf_set_lines(bufnr, insertion_point, insertion_point, true, scls)
-    end
 end
 
 return M

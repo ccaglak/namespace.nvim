@@ -12,8 +12,7 @@ end
 
 M.add_to_buffer = function(line, bufnr)
     bufnr = bufnr or M.get_bufnr()
-    local insertion_point = utils.get_insertion_point()
+    local insertion_point = utils.get_insertion_point(bufnr)
     vim.api.nvim_buf_set_lines(bufnr, insertion_point, insertion_point, true, { line })
-    vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
 end
 return M
