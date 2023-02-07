@@ -9,6 +9,8 @@ local bf = require("namespace.buffer")
 local M = {}
 
 M.get = function(cWord, mbufnr)
+    local gcls = false
+    if cWord == nil then gcls = true end
     mbufnr = mbufnr or utils.get_bufnr()
     if vim.api.nvim_buf_get_option(mbufnr, "filetype") ~= "php" then return end
     local prefix = tree.namespace_prefix()
@@ -22,7 +24,7 @@ M.get = function(cWord, mbufnr)
         cWord = cWord:gsub("%\\\\", "\\")
         cWord = "use " .. cWord .. ";"
         if not used:contains(cWord) then
-            M.add_to_buffer(cWord)
+            bf.add_to_buffer(cWord, mbufnr)
         end
     end
 
@@ -32,9 +34,16 @@ M.get = function(cWord, mbufnr)
         if sr == nil then
             vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
         elseif #sr == 1 then
-            bf.add_to_buffer(sr:unpack(), mbufnr)
+            local line = sr:unpack()
+            line = line:gsub("%\\\\", "\\")
+            line = "use " .. line .. ";"
+            bf.add_to_buffer(line, mbufnr)
         elseif #sr > 1 then
-            pop.popup(sr, mbufnr)
+            -- pop.popup(sr, mbufnr)
+            if gcls == false then
+                return { sr:unpack() }
+            end
+            pop.popup({ { sr:unpack() } }, mbufnr) --requires double brackets to be able check size in popui
         end
     end
 
@@ -48,7 +57,11 @@ M.get = function(cWord, mbufnr)
             bf.add_to_buffer(line, mbufnr)
         end
     elseif #searched > 1 then
-        pop.popup(searched, mbufnr)
+        if gcls == false then
+            return { searched:unpack() }
+        end
+        pop.popup({ { searched:unpack() } }, mbufnr) --requires double brackets to be able check size in popui
+        -- pop.popup(searched, mbufnr)
     end
 
     -- vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})

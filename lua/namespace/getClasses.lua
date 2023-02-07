@@ -90,9 +90,14 @@ M.get = function()
     end
     if #fclss == 0 then return end
     ----
+    local ptbl = {}
     for _, cls in fclss:iter() do
-        gcls.get(cls, mbufnr) -- get_class
+        local p = gcls.get(cls, mbufnr) -- get_class
+        if p ~= nil then
+            table.insert(ptbl, p)
+        end
     end
+    pop.popup(ptbl, mbufnr)
 
 end
 

@@ -51,7 +51,7 @@ M.RSearch = function(classes, prefix)
         local result = unpack(rg:result())
         if result ~= nil then
             local namespace = M.get_file_namespace(result) .. "\\" .. class
-            table.insert(namespaces, namespace)
+            namespaces:insert(1, namespace)
         end
     end
 
