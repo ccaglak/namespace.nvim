@@ -56,7 +56,7 @@ Neovim Php Namespace Resolver - tested on mac
 -   Option how to sort
 
 ## Known bugs
-
+-   no known bugs
 -   Let me know if you have any edge cases
 
 ## Check Out

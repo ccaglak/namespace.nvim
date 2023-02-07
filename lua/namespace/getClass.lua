@@ -39,7 +39,6 @@ M.get = function(cWord, mbufnr)
             line = "use " .. line .. ";"
             bf.add_to_buffer(line, mbufnr)
         elseif #sr > 1 then
-            -- pop.popup(sr, mbufnr)
             if gcls == false then
                 return { sr:unpack() }
             end
