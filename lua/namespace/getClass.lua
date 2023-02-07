@@ -45,6 +45,7 @@ M.get = function(cWord, mbufnr)
             end
             pop.popup({ { sr:unpack() } }, mbufnr) --requires double brackets to be able check size in popui
         end
+        return
     end
 
     local searched = tree.search_parse(sr) -- return namespace

@@ -31,7 +31,6 @@ function M.popup(ret_namespaces, buf)
             coroutine.resume(co)
         end
     end))
-    -- timer:close() -- Always close handles to avoid leaks.
 end
 
 function M.pop(rnamespaces)
@@ -64,7 +63,7 @@ function M.pop(rnamespaces)
         buf_nr,
         "n",
         "q",
-        ":q!<cr>",
+        "<cmd>lua require('namespace.popui').close_popup()<cr>",
         { noremap = true, silent = true }
     )
     vim.api.nvim_buf_set_keymap(
