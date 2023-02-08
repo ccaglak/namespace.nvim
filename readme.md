@@ -2,7 +2,7 @@
 
 Neovim Php Namespace Resolver - tested on mac
 
-[![asciicast](https://asciinema.org/a/kqXkcSyzRJqU4or9lhLVoaxXq.svg)](https://asciinema.org/a/kqXkcSyzRJqU4or9lhLVoaxXq)
+[![asciicast](https://asciinema.org/a/558130.svg)](https://asciinema.org/a/558130)
 
 ## Install
 
