@@ -1,15 +1,25 @@
 local List   = require("plenary.collections.py_list")
 local native = require("namespace.classes")
 
-local M = {}
+local M      = {}
 
-M.path_sep = function()
+M.path_sep   = function()
     local win = vim.loop.os_uname().sysname == 'Darwin' or "Linux"
     return win and '/' or '\\'
 end
 
-M.absolute = function()
+M.absolute   = function()
     return vim.loop.cwd()
+end
+
+function table.unique(list)
+    local ret, hash = {}, {}
+    for _, value in ipairs(list) do
+        if not hash[value] then table.insert(ret, value) end
+        hash[value] = true
+    end
+
+    return ret
 end
 
 ----------------------
@@ -73,7 +83,7 @@ M.get_insertion_point = function(bufnr)
     local content = vim.api.nvim_buf_get_lines(bufnr, 0, vim.api.nvim_buf_line_count(bufnr), false)
 
     -- default to line 3
-    local insertion_point = 3
+    local insertion_point = 2
     local namespace_line_number = nil
     local last_use_statement_line_number = nil
 

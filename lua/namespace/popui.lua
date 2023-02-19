@@ -17,14 +17,14 @@ function M.popup(ret_namespaces, buf)
     end
     local timer = vim.loop.new_timer()
     local co = coroutine.create(function()
-            for i, cls in pairs(ret_namespaces) do
-                table.insert(namespaces, cls)
-                coroutine.yield(M.pop(cls))
-                if i == #ret_namespaces then
-                    timer:close()
-                end
+        for i, cls in pairs(ret_namespaces) do
+            table.insert(namespaces, cls)
+            coroutine.yield(M.pop(cls))
+            if i == #ret_namespaces then
+                timer:close()
             end
-        end)
+        end
+    end)
 
     timer:start(500, 250, vim.schedule_wrap(function()
         if done == true then
@@ -47,15 +47,15 @@ function M.pop(rnamespaces)
     local title = "PHPNamespace"
 
     local win, _ = popup.create(buf_nr, {
-            line = math.floor(((vim.o.lines - height) / 2) - 1),
-            col = math.floor((vim.o.columns - width) / 2),
-            minwidth = width,
-            minheight = height,
-            title = title,
-            cursorline = true,
-            focusable = true,
-            borderchars = borderchars,
-        })
+        line = math.floor(((vim.o.lines - height) / 2) - 1),
+        col = math.floor((vim.o.columns - width) / 2),
+        minwidth = width,
+        minheight = height,
+        title = title,
+        cursorline = true,
+        focusable = true,
+        borderchars = borderchars,
+    })
     table.insert(popup_atts, { buf_nr, win })
     vim.api.nvim_win_set_option(win, "number", true)
     vim.api.nvim_win_set_option(win, "wrap", false)
@@ -75,7 +75,7 @@ function M.pop(rnamespaces)
     )
 end
 
-function M.select_item()
+M.select_item = function()
     local pt = table.remove(namespaces, #namespaces)
     local id = vim.fn.line(".")
 
@@ -88,7 +88,6 @@ function M.select_item()
     bf.add_to_buffer(selectedline, mbufnr)
 end
 
--- get the tables first buffer win delete that -- popups stack on top therefore getting the last
 M.close_popup = function()
     local pt = table.remove(popup_atts, #popup_atts)
     vim.api.nvim_win_close(pt[2], true)

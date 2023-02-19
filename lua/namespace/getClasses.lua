@@ -1,16 +1,16 @@
-local tq     = require("vim.treesitter.query")
-local List   = require("plenary.collections.py_list")
-local pop    = require("namespace.popui")
-local tree   = require("namespace.treesitter")
-local utils  = require("namespace.utils")
-local search = require("namespace.search")
-local gcls   = require("namespace.getClass")
+local tq               = require("vim.treesitter.query")
+local List             = require("plenary.collections.py_list")
+local pop              = require("namespace.popui")
+local tree             = require("namespace.treesitter")
+local utils            = require("namespace.utils")
+local search           = require("namespace.search")
+local gcls             = require("namespace.getClass")
 
-local co = coroutine
-local M  = {}
+local co               = coroutine
+local M                = {}
 
 --get_class_names from the buffer
-M.get_class_names = function()
+M.get_class_names      = function()
     local root, bufnr = tree.get_root("php")
 
     local query = vim.treesitter.parse_query(
@@ -42,10 +42,25 @@ right: (name) @cls
 end
 
 -- gets the main class
-M.get_file_class = function()
+M.get_file_class       = function()
     local root, bufnr = tree.get_root("php")
 
     local query = vim.treesitter.parse_query("php", [[(class_declaration name:(name) @name)]])
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = tq.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
+end
+
+-- check if extendend class in folder if so ignore
+M.get_extended_class   = function()
+    local root, bufnr = tree.get_root("php")
+
+    local query = vim.treesitter.parse_query("php", [[(base_clause (name) @extends )]])
     local clsNames = List({})
     for n, captures, _ in query:iter_matches(root, bufnr) do
         local clsName = tq.get_node_text(captures[n], bufnr)
@@ -73,12 +88,13 @@ M.namespaces_in_buffer = function()
     return clsNames
 end
 
-M.get = function()
+M.get                  = function()
     if vim.api.nvim_buf_get_option(0, "filetype") ~= "php" then return end
     local mbufnr = utils.get_bufnr()
 
     local fclss = M.get_class_names() -- gets the class names
     local local_class = M.get_file_class() -- get the local_class name
+    -- TODO: check if the extended class is in folder
     local eclss = M.namespaces_in_buffer() --  namespace in buffer
     if #local_class ~= 0 then -- checks whether there is class in the file
         eclss:insert(1, local_class:unpack()) -- inserts local_class here to to get it filtered
@@ -98,7 +114,6 @@ M.get = function()
         end
     end
     pop.popup(ptbl, mbufnr)
-
 end
 
 return M
