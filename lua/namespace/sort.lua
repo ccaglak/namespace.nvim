@@ -10,7 +10,7 @@ local root = 0
 M.namespaces = function()
     root, bufnr = tree.get_root('php')
 
-    local query = vim.treesitter.parse_query("php", [[(namespace_use_declaration) @use]])
+    local query = vim.treesitter.query.parse("php", [[(namespace_use_declaration) @use]])
     local namespaces = List({})
     local line = {}
     for _, captures, _ in query:iter_matches(root, bufnr) do

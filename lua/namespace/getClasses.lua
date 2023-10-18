@@ -3,17 +3,15 @@ local List             = require("plenary.collections.py_list")
 local pop              = require("namespace.popui")
 local tree             = require("namespace.treesitter")
 local utils            = require("namespace.utils")
-local search           = require("namespace.search")
 local gcls             = require("namespace.getClass")
 
-local co               = coroutine
 local M                = {}
 
 --get_class_names from the buffer
 M.get_class_names      = function()
     local root, bufnr = tree.get_root("php")
 
-    local query = vim.treesitter.parse_query(
+    local query = vim.treesitter.query.parse(
         "php",
         [[
 (scoped_call_expression scope:(name) @sce)
@@ -45,7 +43,7 @@ end
 M.get_file_class       = function()
     local root, bufnr = tree.get_root("php")
 
-    local query = vim.treesitter.parse_query("php", [[(class_declaration name:(name) @name)]])
+    local query = vim.treesitter.query.parse("php", [[(class_declaration name:(name) @name)]])
     local clsNames = List({})
     for n, captures, _ in query:iter_matches(root, bufnr) do
         local clsName = tq.get_node_text(captures[n], bufnr)
@@ -60,7 +58,7 @@ end
 M.get_extended_class   = function()
     local root, bufnr = tree.get_root("php")
 
-    local query = vim.treesitter.parse_query("php", [[(base_clause (name) @extends )]])
+    local query = vim.treesitter.query.parse("php", [[(base_clause (name) @extends )]])
     local clsNames = List({})
     for n, captures, _ in query:iter_matches(root, bufnr) do
         local clsName = tq.get_node_text(captures[n], bufnr)
@@ -74,7 +72,7 @@ end
 M.namespaces_in_buffer = function()
     local root, bufnr = tree.get_root("php")
 
-    local query = vim.treesitter.parse_query("php", [[
+    local query = vim.treesitter.query.parse("php", [[
         (namespace_use_clause (qualified_name (name) @name))
         (namespace_use_clause (name) @pname)
         ]])
@@ -92,11 +90,11 @@ M.get                  = function()
     if vim.api.nvim_buf_get_option(0, "filetype") ~= "php" then return end
     local mbufnr = utils.get_bufnr()
 
-    local fclss = M.get_class_names() -- gets the class names
-    local local_class = M.get_file_class() -- get the local_class name
+    local fclss = M.get_class_names()         -- gets the class names
+    local local_class = M.get_file_class()    -- get the local_class name
     -- TODO: check if the extended class is in folder
-    local eclss = M.namespaces_in_buffer() --  namespace in buffer
-    if #local_class ~= 0 then -- checks whether there is class in the file
+    local eclss = M.namespaces_in_buffer()    --  namespace in buffer
+    if #local_class ~= 0 then                 -- checks whether there is class in the file
         eclss:insert(1, local_class:unpack()) -- inserts local_class here to to get it filtered
     end
 

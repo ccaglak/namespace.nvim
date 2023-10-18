@@ -60,7 +60,7 @@ M.get = function(cWord, mbufnr)
         if gcls == false then
             return { searched:unpack() }
         end
-        pop.popup({ { searched:unpack() } }, mbufnr) --requires double brackets to be able check size in popui
+        pop.popup({ { searched:unpack() } }, mbufnr) --requires double brackets to be able ch
         -- pop.popup(searched, mbufnr)
     end
 

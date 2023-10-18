@@ -1,4 +1,4 @@
--- borrowed form lazyvim https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/util/init.lua
+-- borrowed from lazyvim https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/util/init.lua
 local sep = require('namespace.utils').path_sep()
 local M = {}
 

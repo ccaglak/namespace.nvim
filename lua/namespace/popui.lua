@@ -1,5 +1,5 @@
 local popup = require("plenary.popup")
-local List = require("plenary.collections.py_list")
+-- local List = require("plenary.collections.py_list")
 local bf = require("namespace.buffer")
 
 local M = {}

@@ -15,7 +15,7 @@ end
 M.get_all_namespaces = function()
     local root, bufnr = M.get_root("php")
 
-    local query = vim.treesitter.parse_query("php", [[(namespace_use_declaration) @use]])
+    local query = vim.treesitter.query.parse("php", [[(namespace_use_declaration) @use]])
     local clsNames = List({})
     for n, captures, _ in query:iter_matches(root, bufnr) do
         local clsName = tq.get_node_text(captures[n], bufnr)
@@ -29,7 +29,7 @@ end
 M.namespaces_in_buffer = function()
     local root, bufnr = M.get_root("php")
 
-    local query = vim.treesitter.parse_query("php", [[
+    local query = vim.treesitter.query.parse("php", [[
         (namespace_use_clause (qualified_name (name) @name))
         (namespace_use_clause (name) @pname)
         ]])
@@ -47,7 +47,7 @@ M.search_parse = function(sr)
     local searched = List({})
     local bufnr = M.create_search_bufnr(sr)
     local root = M.get_root("php", bufnr)
-    local query = vim.treesitter.parse_query(
+    local query = vim.treesitter.query.parse(
         "php",
         [[
 (array_element_initializer
@@ -94,7 +94,7 @@ M.namespace_prefix = function()
     -- get class namespace prefix
     local bufnr = M.new_buffer('composer.json')
     local root = M.get_root("json", bufnr)
-    local query = vim.treesitter.parse_query(
+    local query = vim.treesitter.query.parse(
         "json",
         [[
   (pair
