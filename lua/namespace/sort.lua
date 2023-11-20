@@ -1,5 +1,5 @@
 -- sort
-local tq = require("vim.treesitter")
+local ts = require("vim.treesitter")
 local List = require("plenary.collections.py_list")
 local tree = require("namespace.treesitter")
 
@@ -10,16 +10,16 @@ local root = 0
 M.namespaces = function()
     root, bufnr = tree.get_root('php')
 
-    local query = vim.treesitter.query.parse("php", [[(namespace_use_declaration) @use]])
+    local query = ts.query.parse("php", [[(namespace_use_declaration) @use]])
     local namespaces = List({})
     local line = {}
     for _, captures, _ in query:iter_matches(root, bufnr) do
-        local clsName = tq.get_node_text(captures[1], bufnr)
+        local clsName = ts.get_node_text(captures[1], bufnr)
         if not namespaces:contains(clsName) then
             namespaces:insert(1, clsName)
         end
         for _, key in ipairs(captures) do
-            local row, _, _, _ = vim.treesitter.get_node_range(key)
+            local row, _, _, _ = ts.get_node_range(key)
             table.insert(line, row)
         end
 
