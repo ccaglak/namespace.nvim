@@ -1,5 +1,5 @@
 -- sort
-local tq = require("vim.treesitter.query")
+local tq = require("vim.treesitter")
 local List = require("plenary.collections.py_list")
 local tree = require("namespace.treesitter")
 
