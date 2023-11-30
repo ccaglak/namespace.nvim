@@ -13,7 +13,8 @@ M.get_class = function()
 end
 
 M.sort_classes = function()
-    sort.sort()
+    -- sort.sort()
+    print('Deprecated')
 end
 
 return M
