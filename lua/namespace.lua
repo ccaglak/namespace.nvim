@@ -1,12 +1,13 @@
 -- main module file
 
-local ns = require("namespace.getClasses")
+local gcs = require("namespace.getClasses")
 local gc = require("namespace.getClass")
 local as = require('namespace.asClass')
+local ns = require('namespace.namespace')
 
 local M = {}
 M.get_classes = function()
-    ns.get()
+    gcs.get()
 end
 
 M.get_class = function()
@@ -20,6 +21,10 @@ end
 
 M.as_class = function()
     as.open()
+end
+
+M.name_space = function()
+    ns.gen()
 end
 
 return M

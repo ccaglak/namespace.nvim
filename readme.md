@@ -6,6 +6,16 @@ Neovim Php Namespace Resolver
 
 [![asciicast](https://asciinema.org/a/558130.svg)](https://asciinema.org/a/558130)
 
+## Basic Usage
+
+-   `:GetAllClasses` or `GetClasses` Finds all classes, traits, implementations, attributes, from composer or from local search
+-   `:GetClass` gets class under cursor
+-   `:AsClass` As classes  -- example use Illuminate\Routing\Controller as BaseController;
+-   gets class under cursor if it exists and names it or if cant find will seach composer and popup to name it
+-   `:Namespace` generates namespace
+
+-   `:SortClass` Depricated -- pass it on to formatters
+
 ## Install
 
 ```lua
@@ -18,23 +28,14 @@ Neovim Php Namespace Resolver
 }
 
 ```
-```lua
-
-{  -- packer
-    'ccaglak/namespace.nvim',
-    requires = {
-        "nvim-lua/plenary.nvim"
-    }
-}
-
-```
 
 ## Keymaps -- No default keymaps
 
 ```vim
-    vim.keymap.set("n", "<leader>la", "<cmd>GetAllClasses<cr>")
+    vim.keymap.set("n", "<leader>la", "<cmd>GetClasses<cr>")
     vim.keymap.set("n", "<leader>lc", "<cmd>GetClass<cr>")
     vim.keymap.set("n", "<leader>ls", "<cmd>AsClass<cr>")
+    vim.keymap.set("n", "<leader>ln", "<cmd>Namespace<cr>")
 ```
 
 ## Requires
@@ -43,21 +44,9 @@ Neovim Php Namespace Resolver
 -   nvim-treesitter (`:TSInstall php`, `:TSInstall json`)
 -   brew install ripgrep
 
-## Basic Usage
-
--   `:GetAllClasses` Finds all classes, traits, implementations, attributes, from composer or local search
-
--   `:GetClass` gets class under cursor
--   `:AsClass` As classes  -- use Illuminate\Routing\Controller as BaseController;
--   gets class under cursor if it exists and names it or if cant find will seach composer and popup to name it
-
--   `:SortClass` Depricated -- pass it on to formatters
-
-
 ## Features to be add
-
--   AutoNamespace generator
--   Option how to sort
+    -- needs to be cleanup/refactored
+    -- add missing method/class etc
 
 ## Known bugs
 -   no known bugs
