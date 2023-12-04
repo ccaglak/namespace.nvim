@@ -10,7 +10,7 @@ Neovim Php Namespace Resolver
 
 -   `:GetAllClasses` or `GetClasses` Finds all classes, traits, implementations, attributes, from composer or from local search
 -   `:GetClass` gets class under cursor
--   `:AsClass` As classes  -- example use Illuminate\Routing\Controller as BaseController;
+-   `:AsClass` class As -- under cursor or on empty  -- example use Illuminate\Routing\Controller as BaseController;
 -   gets class under cursor if it exists and names it or if cant find will seach composer and popup to name it
 -   `:Namespace` generates namespace
 
@@ -22,6 +22,12 @@ Neovim Php Namespace Resolver
 
 {  -- lazy
     'ccaglak/namespace.nvim',
+    keys = {
+        { "<leader>la", "<cmd>GetClasses<cr>"},
+        { "<leader>lc", "<cmd>GetClass<cr>"},
+        { "<leader>ls", "<cmd>AsClass<cr>"},
+        { "<leader>ln", "<cmd>Namespace<cr>"},
+    }
     dependencies = {
         "nvim-lua/plenary.nvim"
     }
