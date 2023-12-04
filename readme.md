@@ -1,6 +1,8 @@
 ## Namespace.nvim
 
-Neovim Php Namespace Resolver - tested on mac
+Neovim Php Namespace Resolver
+
+- Feels better then intelephense & phpactor features
 
 [![asciicast](https://asciinema.org/a/558130.svg)](https://asciinema.org/a/558130)
 
@@ -32,7 +34,7 @@ Neovim Php Namespace Resolver - tested on mac
 ```vim
     vim.keymap.set("n", "<leader>la", "<cmd>GetAllClasses<cr>")
     vim.keymap.set("n", "<leader>lc", "<cmd>GetClass<cr>")
-    vim.keymap.set("n", "<leader>ls", "<cmd>SortClass<cr>")
+    vim.keymap.set("n", "<leader>ls", "<cmd>AsClass<cr>")
 ```
 
 ## Requires
@@ -43,16 +45,18 @@ Neovim Php Namespace Resolver - tested on mac
 
 ## Basic Usage
 
--   `:GetAllClasses` Finds all classes
+-   `:GetAllClasses` Finds all classes, traits, implementations, attributes, from composer or local search
 
 -   `:GetClass` gets class under cursor
+-   `:AsClass` As classes  -- use Illuminate\Routing\Controller as BaseController;
+-   gets class under cursor if it exists and names it or if cant find will seach composer and popup to name it
 
--   `:SortClass` sorts classes
+-   `:SortClass` Depricated -- pass it on to formatters
+
 
 ## Features to be add
 
 -   AutoNamespace generator
-
 -   Option how to sort
 
 ## Known bugs

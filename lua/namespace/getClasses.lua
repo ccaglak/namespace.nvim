@@ -1,5 +1,3 @@
-local ts = require("vim.treesitter")
-local List = require("plenary.collections.py_list")
 local pop = require("namespace.popui")
 local tree = require("namespace.treesitter")
 local utils = require("namespace.utils")
@@ -7,88 +5,6 @@ local gcls = require("namespace.getClass")
 
 local M = {}
 
---get_class_names from the buffer
-M.get_class_names = function()
-    local root, bufnr = tree.get_root("php")
-
-    local query = ts.query.parse(
-        "php",
-        [[
-(scoped_call_expression scope:(name) @sce)
-(named_type (name) @named)
-(base_clause (name) @extends )
-(class_interface_clause (name) @implements)
-(class_constant_access_expression (name) @static (name))
-(simple_parameter type: (union_type (named_type (name) @name)))
-(object_creation_expression (name) @objcreation)
-(use_declaration (name) @use )
-((binary_expression
-left: (class_constant_access_expression)
-right: (name) @cls
-) @b (#match? @b "instanceof"))
-  ]]
-    )
-
-    local clsNames = List({})
-    for n, captures, _ in query:iter_matches(root, bufnr) do
-        local clsName = ts.get_node_text(captures[n], bufnr)
-        if not clsNames:contains(clsName) then
-            clsNames:insert(1, clsName)
-        end
-    end
-    return clsNames
-end
-
--- gets the main class
-M.get_file_class = function()
-    local root, bufnr = tree.get_root("php")
-
-    local query =
-        ts.query.parse("php", [[(class_declaration name:(name) @name)]])
-    local clsNames = List({})
-    for n, captures, _ in query:iter_matches(root, bufnr) do
-        local clsName = ts.get_node_text(captures[n], bufnr)
-        if not clsNames:contains(clsName) then
-            clsNames:insert(1, clsName)
-        end
-    end
-    return clsNames
-end
-
--- check if extendend class in folder if so ignore
-M.get_extended_class = function()
-    local root, bufnr = tree.get_root("php")
-
-    local query = ts.query.parse("php", [[(base_clause (name) @extends )]])
-    local clsNames = List({})
-    for n, captures, _ in query:iter_matches(root, bufnr) do
-        local clsName = ts.get_node_text(captures[n], bufnr)
-        if not clsNames:contains(clsName) then
-            clsNames:insert(1, clsName)
-        end
-    end
-    return clsNames
-end
-
-M.namespaces_in_buffer = function()
-    local root, bufnr = tree.get_root("php")
-
-    local query = ts.query.parse(
-        "php",
-        [[
-        (namespace_use_clause (qualified_name (name) @name))
-        (namespace_use_clause (name) @pname)
-        ]]
-    )
-    local clsNames = List({})
-    for n, captures, _ in query:iter_matches(root, bufnr) do
-        local clsName = ts.get_node_text(captures[n], bufnr)
-        if not clsNames:contains(clsName) then
-            clsNames:insert(1, clsName)
-        end
-    end
-    return clsNames
-end
 
 M.get = function()
     if vim.api.nvim_buf_get_option(0, "filetype") ~= "php" then
@@ -96,10 +12,10 @@ M.get = function()
     end
     local mbufnr = utils.get_bufnr()
 
-    local fclss = M.get_class_names()         -- gets the class names
-    local local_class = M.get_file_class()    -- get the local_class name
-    -- TODO: check if the extended class is in folder
-    local eclss = M.namespaces_in_buffer()    --  namespace in buffer
+    local fclss = tree.get_class_names()      -- gets the class names
+    local local_class = tree.get_file_class() -- get the local_class name
+
+    local eclss = tree.namespaces_in_buffer() --  namespace in buffer
 
     if #local_class ~= 0 then                 -- checks whether there is class in the file
         eclss:insert(1, local_class:unpack()) -- inserts local_class here to to get it filtered

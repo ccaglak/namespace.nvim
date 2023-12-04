@@ -1,7 +1,8 @@
 -- main module file
+
 local ns = require("namespace.getClasses")
-local sort = require("namespace.sort")
 local gc = require("namespace.getClass")
+local as = require('namespace.asClass')
 
 local M = {}
 M.get_classes = function()
@@ -14,7 +15,11 @@ end
 
 M.sort_classes = function()
     -- sort.sort()
-    print('Deprecated')
+    print('Deprecated: formatters does this feature')
+end
+
+M.as_class = function()
+    as.open()
 end
 
 return M

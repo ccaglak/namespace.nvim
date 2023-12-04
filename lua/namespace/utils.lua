@@ -89,12 +89,16 @@ M.get_insertion_point = function(bufnr)
 
 
     for i, line in ipairs(content) do
-        if line:find("^(namespace|use)") then
+        if line:find("^(namespace|use|declare)") then
             if line:find("^namespace") then
                 namespace_line_number = i
             end
 
             if line:find("^use") then
+                last_use_statement_line_number = i
+            end
+
+            if line:find("^declare") then
                 last_use_statement_line_number = i
             end
         end

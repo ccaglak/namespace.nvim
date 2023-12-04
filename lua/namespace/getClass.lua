@@ -11,11 +11,16 @@ local M = {}
 M.get = function(cWord, mbufnr)
     local gcls = false
     if cWord == nil then gcls = true end
+
     mbufnr = mbufnr or utils.get_bufnr()
+
     if vim.api.nvim_buf_get_option(mbufnr, "filetype") ~= "php" then return end
+
     local prefix = tree.namespace_prefix()
+
     cWord = cWord or vim.fn.escape(vim.fn.expand('<cword>'), [[\/]])
-    local used = tree.namespaces_in_buffer() --  class
+
+    local used = tree.namespaces_in_buffer()                         --  class
 
     local filtered_class = utils.class_filter(List({ cWord }), used) --
     if #filtered_class == 0 then return end
@@ -31,7 +36,7 @@ M.get = function(cWord, mbufnr)
     local sr = search.CSearch(cWord)
     if #sr == 0 then
         sr = search.RSearch(List({ cWord }), prefix)
-        if sr == nil then
+        if #sr == 0 then
             vim.api.nvim_echo({ { "0 Lines Added", 'Function' }, { ' ' .. 0 } }, true, {})
         elseif #sr == 1 then
             local line = sr:unpack()

@@ -1,15 +1,77 @@
-local ts   = require("vim.treesitter")
-local List = require("plenary.collections.py_list")
-local rt   = require("namespace.root").root()
-local sep  = require('namespace.utils').path_sep()
+local ts             = require("vim.treesitter")
+local List           = require("plenary.collections.py_list")
+local rt             = require("namespace.root").root()
+local sep            = require('namespace.utils').path_sep()
 
-local M    = {}
+local M              = {}
 
-M.get_root = function(language, bufnr)
+M.get_root           = function(language, bufnr)
     bufnr = bufnr or vim.api.nvim_get_current_buf()
     local parser = ts.get_parser(bufnr, language, {})
     local tree = parser:parse()[1]
     return tree:root(), bufnr
+end
+
+-- gets the class in the buffer
+M.get_file_class     = function()
+    local root, bufnr = M.get_root("php")
+
+    local query =
+        ts.query.parse("php", [[(class_declaration name:(name) @name)]])
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = ts.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
+end
+
+-- check if extendend class in folder if so ignore
+M.get_extended_class = function()
+    local root, bufnr = M.get_root("php")
+
+    local query = ts.query.parse("php", [[(base_clause (name) @extends )]])
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = ts.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
+end
+
+M.get_class_names    = function()
+    local root, bufnr = M.get_root("php")
+
+    local query = ts.query.parse(
+        "php",
+        [[
+(scoped_call_expression scope:(name) @sce)
+(named_type (name) @named)
+(base_clause (name) @extends )
+(class_interface_clause (name) @implements)
+(class_constant_access_expression (name) @static (name))
+(simple_parameter type: (union_type (named_type (name) @name)))
+(object_creation_expression (name) @objcreation)
+(use_declaration (name) @use )
+((binary_expression
+left: (class_constant_access_expression)
+right: (name) @cls
+) @b (#match? @b "instanceof"))
+  ]]
+    )
+
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = ts.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
 end
 
 

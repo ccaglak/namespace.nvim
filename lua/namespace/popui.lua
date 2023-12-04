@@ -1,14 +1,17 @@
 local popup = require("plenary.popup")
--- local List = require("plenary.collections.py_list")
 local bf = require("namespace.buffer")
+local List = require("plenary.collections.py_list")
 
 local M = {}
 local popup_atts = {} -- stores popup buffer, winid
 local namespaces = {}
-local mbufnr -- main (current) buffer
+local mbufnr          -- main (current) buffer
+
+M.asRequired = false
 
 local done = true
-function M.popup(ret_namespaces, buf)
+function M.popup(ret_namespaces, buf, asbool)
+    M.asRequired = asbool or false
     mbufnr = buf
     if #ret_namespaces == 1 then
         table.insert(namespaces, unpack(ret_namespaces))
@@ -41,21 +44,20 @@ function M.pop(rnamespaces)
     vim.api.nvim_buf_set_option(buf_nr, "modifiable", false)
     local width = 60
     local height = 10
-    local borderchars =
-    { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+    local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
-    local title = "PHPNamespace"
 
     local win, _ = popup.create(buf_nr, {
         line = math.floor(((vim.o.lines - height) / 2) - 1),
         col = math.floor((vim.o.columns - width) / 2),
         minwidth = width,
         minheight = height,
-        title = title,
+        title = "PHPNamespace",
         cursorline = true,
         focusable = true,
         borderchars = borderchars,
     })
+
     table.insert(popup_atts, { buf_nr, win })
     vim.api.nvim_win_set_option(win, "number", true)
     vim.api.nvim_win_set_option(win, "wrap", false)
@@ -83,7 +85,13 @@ M.select_item = function()
     local selectedline = pt[id]
 
     selectedline = selectedline:gsub("%\\\\", "\\")
+
+    if M.asRequired == true then
+        require("namespace.asClass").input(List({ selectedline }))
+        return
+    end
     selectedline = "use " .. selectedline .. ";"
+
     pt = ""
     bf.add_to_buffer(selectedline, mbufnr)
 end

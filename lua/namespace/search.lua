@@ -3,6 +3,7 @@ local Job = require("plenary.job")
 local rt = require("namespace.root").root()
 local sep = require('namespace.utils').path_sep()
 
+
 local M = {}
 
 -- search in composer autoload_classmap
@@ -29,7 +30,6 @@ M.get_file_namespace = function(file)
             return line:match("namespace (.*);")
         end
     end
-
 end
 
 -- search in root directory
@@ -57,5 +57,6 @@ M.RSearch = function(classes, prefix)
 
     return namespaces
 end
+
 
 return M
