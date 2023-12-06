@@ -49,19 +49,19 @@ M.get_class_names    = function()
     local query = ts.query.parse(
         "php",
         [[
-(scoped_call_expression scope:(name) @sce)
-(named_type (name) @named)
-(base_clause (name) @extends )
-(class_interface_clause (name) @implements)
-(class_constant_access_expression (name) @static (name))
-(simple_parameter type: (union_type (named_type (name) @name)))
-(object_creation_expression (name) @objcreation)
-(use_declaration (name) @use )
-((binary_expression
-left: (class_constant_access_expression)
-right: (name) @cls
-) @b (#match? @b "instanceof"))
-  ]]
+        (scoped_call_expression scope:(name) @sce)
+        (named_type (name) @named)
+        (base_clause (name) @extends )
+        (class_interface_clause (name) @implements)
+        (class_constant_access_expression (name) @static (name))
+        (simple_parameter type: (union_type (named_type (name) @name)))
+        (object_creation_expression (name) @objcreation)
+        (use_declaration (name) @use )
+        ((binary_expression
+        left: (class_constant_access_expression)
+        right: (name) @cls
+        ) @b (#match? @b "instanceof"))
+        ]]
     )
 
     local clsNames = List({})

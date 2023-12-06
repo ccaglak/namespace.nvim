@@ -47,7 +47,7 @@ Neovim Php Namespace Resolver
 ## Requires
 
 -   pleanery.nvim
--   nvim-treesitter (`:TSInstall php`, `:TSInstall json`)
+-   nvim-treesitter (`:TSInstall php json`)
 -   brew install ripgrep
 
 ## Features to be add

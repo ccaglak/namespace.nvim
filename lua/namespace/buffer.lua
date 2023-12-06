@@ -6,12 +6,16 @@ M.get_bufnr = function(filename)
     return vim.fn.bufnr(filename)
 end
 
-M.add_to_buffer = function(line, bufnr)
+-- write to the buffer
+-- insertion_point for the namespace.lua to bypass insertion_point func
+M.add_to_buffer = function(line, bufnr, insertion_point) -- nsb namespace bool - true
     bufnr = bufnr or M.get_bufnr()
     if not vim.api.nvim_buf_is_valid(bufnr) then
         return
     end
-    local insertion_point = utils.get_insertion_point(bufnr)
+    if insertion_point == nil then
+        insertion_point = utils.get_insertion_point(bufnr)
+    end
     vim.api.nvim_buf_set_lines(bufnr, insertion_point, insertion_point, true, { line })
 end
 return M

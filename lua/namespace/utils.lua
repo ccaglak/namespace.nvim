@@ -83,32 +83,25 @@ M.get_insertion_point = function(bufnr)
     local content = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
     -- default to line 3
-    local insertion_point = 3
+    local insertion_point = nil
     local namespace_line_number = nil
     local last_use_statement_line_number = nil
 
-
     for i, line in ipairs(content) do
-        if line:find("^(namespace|use|declare)") then
-            if line:find("^namespace") then
-                namespace_line_number = i
-            end
+        if line:find("^declare") then
+            namespace_line_number = i
+        end
 
-            if line:find("^use") then
-                last_use_statement_line_number = i
-            end
+        if line:find("^namespace") then
+            namespace_line_number = i
+        end
 
-            if line:find("^declare") then
-                last_use_statement_line_number = i
-            end
+        if line:find("^use") then
+            last_use_statement_line_number = i
         end
     end
 
     if namespace_line_number then
-        if not last_use_statement_line_number then
-            -- insert an empty line after the namespace
-            vim.api.nvim_buf_set_lines(bufnr, namespace_line_number, namespace_line_number, true, { "" })
-        end
         insertion_point = namespace_line_number + 1
     end
 
@@ -117,7 +110,7 @@ M.get_insertion_point = function(bufnr)
     end
 
 
-    return insertion_point
+    return insertion_point or 3
 end
 
 return M
