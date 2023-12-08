@@ -4,6 +4,7 @@
 local rt = require("namespace.root")
 local ts = require("namespace.treesitter")
 local bf = require("namespace.buffer")
+local utils = require("namespace.utils")
 
 local M = {}
 
@@ -25,12 +26,24 @@ M.gen = function()
 
     path = path:gsub(prefix[1], prefix[2])
 
-    if path == "" then
-        return
-    end
+    path = M.pascal(path)
 
-    path = "namespace " .. path .. ";"
     bf.add_to_buffer(path, nil, 2)
+end
+
+M.firstToUpper = function(str)
+    return (str:gsub("^%l", string.upper))
+end
+
+M.pascal = function(path)
+    local split_path = utils.spliter(path, "\\")
+    local custom_path = ""
+    for _, value in pairs(split_path) do
+        custom_path = custom_path .. value:gsub("^%l", string.upper) .. "\\"
+    end
+    path = custom_path:sub(1, -2)
+
+    return "namespace " .. path .. ";"
 end
 
 return M
