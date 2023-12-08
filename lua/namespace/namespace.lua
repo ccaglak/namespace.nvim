@@ -23,16 +23,15 @@ M.gen = function()
     path = path:gsub(filename, ""):sub(1, -2):gsub("/", "\\")
 
     local prefix = ts.namespace_prefix()
+    if prefix == nil then
+        return
+    end
 
     path = path:gsub(prefix[1], prefix[2])
 
     path = M.pascal(path)
 
     bf.add_to_buffer(path, nil, 2)
-end
-
-M.firstToUpper = function(str)
-    return (str:gsub("^%l", string.upper))
 end
 
 M.pascal = function(path)
