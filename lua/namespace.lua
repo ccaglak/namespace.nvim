@@ -2,8 +2,8 @@
 
 local gcs = require("namespace.getClasses")
 local gc = require("namespace.getClass")
-local as = require('namespace.asClass')
-local ns = require('namespace.namespace')
+local as = require("namespace.asClass")
+local ns = require("namespace.namespace")
 
 local M = {}
 M.get_classes = function()
@@ -15,8 +15,7 @@ M.get_class = function()
 end
 
 M.sort_classes = function()
-    -- sort.sort()
-    print('Deprecated: formatters does this feature')
+    print("Deprecated: formatters does this feature")
 end
 
 M.as_class = function()
@@ -26,5 +25,6 @@ end
 M.name_space = function()
     ns.gen()
 end
+
 
 return M

@@ -1,13 +1,18 @@
 local List = require("plenary.collections.py_list")
-local Job = require("plenary.job")
-local rt = require("namespace.root").root()
-local sep = require('namespace.utils').path_sep()
+local Job  = require("plenary.job")
+local rt   = require("namespace.root").root()
+local sep  = require('namespace.utils').path_sep()
+local util = require('namespace.utils')
+
 
 
 local M = {}
 
 -- search in composer autoload_classmap
 M.CSearch = function(search)
+    if util.checkFileReadable('composer.json') == nil then
+        return {}
+    end
     local rg = Job:new({
         command = 'rg',
         args = { sep .. search .. ".php", "vendor" .. sep .. "composer" .. sep .. "autoload_classmap.php" },

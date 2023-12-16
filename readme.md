@@ -10,8 +10,7 @@ Neovim Php Namespace Resolver
 
 -   `:GetAllClasses` or `GetClasses` Finds all classes, traits, implementations, attributes, from composer or from local search
 -   `:GetClass` gets class under cursor
--   `:AsClass` class As -- under cursor or on empty  -- example use Illuminate\Routing\Controller as BaseController;
--   gets class under cursor if it exists and names it or if cant find will seach composer and popup to name it
+-   `:AsClass` class As -- gets class under cursor or on empty
 -   `:Namespace` generates namespace
 
 -   `:SortClass` Depricated -- pass it on to formatters

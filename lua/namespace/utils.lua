@@ -1,5 +1,6 @@
 local List   = require("plenary.collections.py_list")
 local native = require("namespace.classes")
+local rt     = require("namespace.root")
 
 local M      = {}
 
@@ -111,6 +112,17 @@ M.get_insertion_point = function(bufnr)
 
 
     return insertion_point or 3
+end
+
+M.checkFileReadable = function(file)
+    local pathFile = rt.root() .. file
+    if vim.fn.filereadable(pathFile) == 0 then
+        pathFile = vim.fn.expand("%:p:h") .. M.path_sep() .. file
+        if vim.fn.filereadable(pathFile) == 0 then
+            return
+        end
+    end
+    return pathFile
 end
 
 return M

@@ -1,7 +1,6 @@
 local ts             = require("vim.treesitter")
 local List           = require("plenary.collections.py_list")
-local rt             = require("namespace.root").root()
-local sep            = require('namespace.utils').path_sep()
+local util           = require('namespace.utils')
 
 local M              = {}
 
@@ -141,13 +140,16 @@ end
 
 -- read composer.json
 -- creates buffer
-M.new_buffer = function(file)
-    local pathFile = rt .. file
-    if vim.fn.filereadable(pathFile) == 0 then
-        pathFile = vim.fn.expand("%:p:h") .. sep .. file
+M.new_composer_buffer = function(file)
+    local pathFile = util.checkFileReadable(file)
+    if pathFile == nil then
+        return
     end
 
     local ctbl = vim.fn.readfile(pathFile)
+    if #ctbl == 0 then
+        return
+    end
 
     local buf = vim.api.nvim_create_buf(false, false)
     vim.api.nvim_buf_set_lines(buf, 1, 1, true, ctbl)
@@ -156,7 +158,10 @@ end
 
 -- gets the prefix from composer but it should be secondary option
 M.namespace_prefix = function()
-    local bufnr = M.new_buffer('composer.json')
+    local bufnr = M.new_composer_buffer('composer.json')
+    if not bufnr then
+        return
+    end
     local root = M.get_root("json", bufnr)
     local query = ts.query.parse(
         "json",
