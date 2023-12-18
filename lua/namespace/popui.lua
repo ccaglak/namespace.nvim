@@ -84,8 +84,6 @@ M.select_item = function()
     M.close_popup()
     local selectedline = pt[id]
 
-    selectedline = selectedline:gsub("%\\\\", "\\")
-
     if M.asRequired == true then
         require("namespace.asClass").input(List({ selectedline }))
         return

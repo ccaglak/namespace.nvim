@@ -24,9 +24,10 @@ M.open = function(cWord)
         end
     end
     local sr = search.CSearch(cWord)
+    -- dd(sr)
     if #sr == 0 then
         local prefix = tree.namespace_prefix()
-        sr = search.RSearch(List({ cWord }), prefix)
+        sr = search.LocalSearch(List({ cWord }), prefix)
         if #sr == 0 then
             return
         elseif #sr == 1 then
@@ -36,6 +37,8 @@ M.open = function(cWord)
         end
         return
     end
+
+
 
     local searched = tree.search_parse(sr) -- return namespace
     if #searched == 1 then

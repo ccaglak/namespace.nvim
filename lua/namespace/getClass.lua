@@ -42,40 +42,56 @@ M.get = function(cWord, mbufnr, gcs)
         bf.add_to_buffer(cWord, mbufnr)
         return
     end
-    local searchResult
+
+    local localResult = search.LocalSearch(List({ cWord }), prefix)
+
+    local composerResult
+
     if vim.fn.findfile("composer.json", ".;") then
-        searchResult = search.CSearch(cWord)
-    end
-    if #searchResult == 0 then
-        searchResult = search.RSearch(List({ cWord }), prefix)
-        if #searchResult == 0 then
-            return
-        elseif #searchResult == 1 then
-            local line = searchResult:unpack()
-            line = M.parseLine(line, mbufnr)
-        elseif #searchResult > 1 then
-            pop.popup({ { searchResult:unpack() } }, mbufnr) --requires double brackets to be able check size in popui
-        end
-        return
+        composerResult = search.CSearch(cWord)
     end
 
-    local searched = tree.search_parse(searchResult) -- return namespace
 
-    if #searched == 1 then
-        local line = searched:unpack()
+    local parsed_search_result = tree.search_parse(composerResult) -- return namespace
+
+    parsed_search_result = M.class_parse(parsed_search_result)
+    parsed_search_result = parsed_search_result:concat(localResult) -- concat two results
+    parsed_search_result = M.unique(parsed_search_result)           -- unique
+    if #parsed_search_result == 0 then return end
+
+    if #parsed_search_result == 1 then
+        local line = parsed_search_result:unpack()
         line = M.parseLine(line, mbufnr)
-    elseif #searched > 1 then
-        pop.popup({ { searched:unpack() } }, mbufnr) --requires double brackets to be able ch
+    elseif #parsed_search_result > 1 then
+        pop.popup({ { parsed_search_result:unpack() } }, mbufnr) --requires double brackets to be able ch
     end
 
     -- vim.api.nvim_echo({ { "Lines Added", 'Function' }, { ' ' .. 1 } }, true, {})
-    searched = {}
+    parsed_search_result = {}
 end
 
 M.parseLine = function(line, mbufnr)
-    line = line:gsub("%\\\\", "\\")
     line = "use " .. line .. ";"
     bf.add_to_buffer(line, mbufnr)
+end
+
+M.class_parse = function(cls)
+    local c = List({})
+    for _, value in cls:iter() do
+        value = value:gsub("%\\\\", "\\")
+        c:insert(1, value)
+    end
+    return c
+end
+
+M.unique = function(list)
+    local ret, hash = {}, {}
+    for _, value in list:iter() do
+        if not hash[value] then table.insert(ret, value) end
+        hash[value] = true
+    end
+
+    return List(ret)
 end
 
 return M

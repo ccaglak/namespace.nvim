@@ -35,9 +35,9 @@ M.get_file_namespace = function(file)
 end
 
 -- search in root directory
-M.RSearch            = function(classes, prefix)
+M.LocalSearch        = function(classes, prefix)
     local rt = require("namespace.root").root()
-    prefix = prefix or { "app", "App" }
+    prefix = prefix or "App"
 
     if #classes == 0 then
         return List({})
