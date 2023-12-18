@@ -45,12 +45,11 @@ M.get = function(cWord, mbufnr, gcs)
 
     local localResult = search.LocalSearch(List({ cWord }), prefix)
 
-    local composerResult
+    local composerResult = List({})
 
     if vim.fn.findfile("composer.json", ".;") then
         composerResult = search.CSearch(cWord)
     end
-
 
     local parsed_search_result = tree.search_parse(composerResult) -- return namespace
 

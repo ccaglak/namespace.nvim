@@ -40,6 +40,7 @@ M.gen = function()
 end
 
 M.pascalCase = function(path, split)
+    if not path then return end
     split = split or "\\"
     local split_path = utils.spliter(path, split)
     local custom_path = ""
