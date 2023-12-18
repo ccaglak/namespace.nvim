@@ -3,7 +3,6 @@ local popup = require("plenary.popup")
 local List = require("plenary.collections.py_list")
 local pop = require("namespace.popui")
 local search = require("namespace.search")
-local utils = require("namespace.utils")
 local tree = require("namespace.treesitter")
 local bf = require("namespace.buffer")
 
@@ -11,11 +10,10 @@ local api = vim.api
 local fn = vim.fn
 
 local M = {}
-local prefix = tree.namespace_prefix()
 
 M.open = function(cWord)
     cWord = cWord or vim.fn.escape(vim.fn.expand("<cword>"), [[\/]])
-    local bufnr = utils.get_bufnr()
+    local bufnr = require("namespace.utils").get_bufnr()
 
     if cWord == "" then
         vim.defer_fn(function()
@@ -27,6 +25,7 @@ M.open = function(cWord)
     end
     local sr = search.CSearch(cWord)
     if #sr == 0 then
+        local prefix = tree.namespace_prefix()
         sr = search.RSearch(List({ cWord }), prefix)
         if #sr == 0 then
             return

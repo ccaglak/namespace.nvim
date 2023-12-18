@@ -1,15 +1,12 @@
-local List = require("plenary.collections.py_list")
-local Job  = require("plenary.job")
-local rt   = require("namespace.root").root()
-local sep  = require('namespace.utils').path_sep()
-local util = require('namespace.utils')
+local List           = require("plenary.collections.py_list")
+local Job            = require("plenary.job")
+local util           = require('namespace.utils')
 
-
-
-local M = {}
+local M              = {}
 
 -- search in composer autoload_classmap
-M.CSearch = function(search)
+M.CSearch            = function(search)
+    local sep = util.path_sep()
     if util.checkFileReadable('composer.json') == nil then
         return {}
     end
@@ -38,7 +35,8 @@ M.get_file_namespace = function(file)
 end
 
 -- search in root directory
-M.RSearch = function(classes, prefix)
+M.RSearch            = function(classes, prefix)
+    local rt = require("namespace.root").root()
     prefix = prefix or { "app", "App" }
 
     if #classes == 0 then

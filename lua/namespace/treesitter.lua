@@ -1,6 +1,5 @@
 local ts             = require("vim.treesitter")
 local List           = require("plenary.collections.py_list")
-local util           = require('namespace.utils')
 
 local M              = {}
 
@@ -141,7 +140,7 @@ end
 -- read composer.json
 -- creates buffer
 M.new_composer_buffer = function(file)
-    local pathFile = util.checkFileReadable(file)
+    local pathFile = require('namespace.utils').checkFileReadable(file)
     if pathFile == nil then
         return
     end
@@ -179,10 +178,13 @@ M.namespace_prefix = function()
     for _, captures, _ in query:iter_matches(root, bufnr) do
         local prefix = ts.get_node_text(captures[2], bufnr)
         local source = ts.get_node_text(captures[3], bufnr)
-        prefix = prefix:gsub("%\\", "")
-        source = source:gsub("/", "")
-        composer:insert(1, prefix)
-        composer:insert(1, source)
+
+        local prefixc = prefix:gsub("%\\", "")
+        local sourcec = source:gsub("/", "")
+
+        composer:insert(1, prefixc)
+        composer:insert(2, sourcec)
+        composer:insert(3, prefix)
     end
     vim.api.nvim_buf_delete(bufnr, { force = true })
 

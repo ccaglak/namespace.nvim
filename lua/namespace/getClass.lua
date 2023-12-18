@@ -13,8 +13,9 @@ M.get = function(cWord, mbufnr, gcs)
     gcs = gcs or false
     local prefix, used
 
-    -- TODO remove as classes from the list     namespace_aliasing_clause
+    -- TODO remove as classes from the list namespace_aliasing_clause
     -- if asclass and extends has the same name dont import it
+    -- *** remove local classes
 
     if not gcs == true then
         mbufnr = mbufnr or utils.get_bufnr()
@@ -41,16 +42,14 @@ M.get = function(cWord, mbufnr, gcs)
         bf.add_to_buffer(cWord, mbufnr)
         return
     end
-
-    local searchResult = search.CSearch(cWord)
+    local searchResult
+    if vim.fn.findfile("composer.json", ".;") then
+        searchResult = search.CSearch(cWord)
+    end
     if #searchResult == 0 then
         searchResult = search.RSearch(List({ cWord }), prefix)
         if #searchResult == 0 then
-            vim.api.nvim_echo(
-                { { "0 Lines Added", "Function" }, { " " .. 0 } },
-                true,
-                {}
-            )
+            return
         elseif #searchResult == 1 then
             local line = searchResult:unpack()
             line = M.parseLine(line, mbufnr)

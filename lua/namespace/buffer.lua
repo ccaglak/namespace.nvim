@@ -1,4 +1,3 @@
-local utils = require("namespace.utils")
 local M = {}
 
 M.get_bufnr = function(filename)
@@ -14,7 +13,7 @@ M.add_to_buffer = function(line, bufnr, insertion_point) -- nsb namespace bool -
         return
     end
     if insertion_point == nil then
-        insertion_point = utils.get_insertion_point(bufnr)
+        insertion_point = require("namespace.utils").get_insertion_point(bufnr)
     end
     vim.api.nvim_buf_set_lines(bufnr, insertion_point, insertion_point, true, { line })
 end
