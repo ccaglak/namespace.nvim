@@ -38,8 +38,7 @@ M.get = function(cWord, mbufnr, gcs)
     end
 
     if native:contains(cWord) then
-        cWord = M.parseLine(cWord)
-        bf.add_to_buffer(cWord, mbufnr)
+        cWord = M.parseLine(cWord, mbufnr)
         return
     end
 
@@ -51,12 +50,16 @@ M.get = function(cWord, mbufnr, gcs)
         composerResult = search.CSearch(cWord)
     end
 
+    if #composerResult == 0 and #localResult == 0 then
+        return
+    end
+
     local parsed_search_result = tree.search_parse(composerResult) -- return namespace
+
 
     parsed_search_result = M.class_parse(parsed_search_result)
     parsed_search_result = parsed_search_result:concat(localResult) -- concat two results
     parsed_search_result = M.unique(parsed_search_result)           -- unique
-    if #parsed_search_result == 0 then return end
 
     if #parsed_search_result == 1 then
         local line = parsed_search_result:unpack()
