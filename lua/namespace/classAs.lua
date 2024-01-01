@@ -35,12 +35,9 @@ M.open = function(cWord)
         elseif #sr > 1 then
             pop.popup({ { sr:unpack() } }, bufnr, true) --requires double brackets to be able check size in popui
         end
-        return
     end
 
-
-
-    local searched = tree.search_parse(sr) -- return namespace
+    local searched = tree.composer_search_parse(sr) -- return namespace
     if #searched == 1 then
         M.input(cWord, bufnr, searched)
     elseif #searched > 1 then
@@ -70,23 +67,10 @@ M.input = function(cWord, mbufnr, searched)
     api.nvim_win_set_option(win.border.win_id, "winhl", "Normal:HarpoonBorder")
 
     api.nvim_buf_set_option(bufnr, "buftype", "prompt")
-    api.nvim_buf_set_keymap(
-        bufnr,
-        "i",
-        "<esc>",
-        "<cmd>q!<cr><esc>",
-        { noremap = true }
-    )
-    api.nvim_buf_set_keymap(
-        bufnr,
-        "n",
-        "<esc>",
-        "<cmd>q!<cr><esc>",
-        { noremap = true }
-    )
+    api.nvim_buf_set_keymap(bufnr, "i", "<esc>", "<cmd>q!<cr><esc>", { noremap = true })
+    api.nvim_buf_set_keymap(bufnr, "n", "<esc>", "<cmd>q!<cr><esc>", { noremap = true })
 
     vim.cmd([[ :startinsert ]])
-
 
     if cWord == "" then
         fn.prompt_setprompt(bufnr, string.format("Class Name > "))

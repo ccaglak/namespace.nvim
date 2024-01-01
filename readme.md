@@ -24,7 +24,7 @@ Neovim Php Namespace Resolver
     keys = {
         { "<leader>la", "<cmd>GetClasses<cr>"},
         { "<leader>lc", "<cmd>GetClass<cr>"},
-        { "<leader>ls", "<cmd>AsClass<cr>"},
+        { "<leader>ls", "<cmd>ClassAs<cr>"},
         { "<leader>ln", "<cmd>Namespace<cr>"},
     }
     dependencies = {

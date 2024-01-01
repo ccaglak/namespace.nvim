@@ -10,7 +10,8 @@ nvim_create_user_command(
     {}
 )
 nvim_create_user_command("GetClass", require("namespace").get_class, {})
-nvim_create_user_command("AsClass", require("namespace").as_class, {})
+nvim_create_user_command("AsClass", require("namespace").class_as, {})
+nvim_create_user_command("ClassAs", require("namespace").class_as, {})
 
 nvim_create_user_command(
     "Namespace",
