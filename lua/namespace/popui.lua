@@ -5,7 +5,7 @@ local List = require("plenary.collections.py_list")
 local M = {}
 local popup_atts = {} -- stores popup buffer, winid
 local namespaces = {}
-local mbufnr          -- main (current) buffer
+local mbufnr -- main (current) buffer
 
 M.asRequired = false
 
@@ -29,23 +29,27 @@ function M.popup(ret_namespaces, buf, asbool)
         end
     end)
 
-    timer:start(500, 250, vim.schedule_wrap(function()
-        if done == true then
-            coroutine.resume(co)
-        end
-    end))
+    timer:start(
+        500,
+        250,
+        vim.schedule_wrap(function()
+            if done == true then
+                coroutine.resume(co)
+            end
+        end)
+    )
 end
 
 function M.pop(rnamespaces)
     done = false
     local buf_nr = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_option(buf_nr, "filetype", "Namespace")
+    vim.api.nvim_set_option_value("filetype", "Namespace", { buf = buf_nr })
     vim.api.nvim_buf_set_lines(buf_nr, 0, -1, true, rnamespaces)
-    vim.api.nvim_buf_set_option(buf_nr, "modifiable", false)
+    vim.api.nvim_set_option_value("modifiable", false, { buf = buf_nr })
     local width = 60
     local height = 10
-    local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
-
+    local borderchars =
+        { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
     local win, _ = popup.create(buf_nr, {
         line = math.floor(((vim.o.lines - height) / 2) - 1),
@@ -59,8 +63,8 @@ function M.pop(rnamespaces)
     })
 
     table.insert(popup_atts, { buf_nr, win })
-    vim.api.nvim_win_set_option(win, "number", true)
-    vim.api.nvim_win_set_option(win, "wrap", false)
+    vim.api.nvim_set_option_value("number", true, { win = win })
+    vim.api.nvim_set_option_value("wrap", false, { win = win })
     vim.api.nvim_buf_set_keymap(
         buf_nr,
         "n",

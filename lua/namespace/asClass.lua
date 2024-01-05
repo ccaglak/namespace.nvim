@@ -35,12 +35,9 @@ M.open = function(cWord)
         elseif #sr > 1 then
             pop.popup({ { sr:unpack() } }, bufnr, true) --requires double brackets to be able check size in popui
         end
-        return
     end
 
-
-
-    local searched = tree.search_parse(sr) -- return namespace
+    local searched = tree.composer_search_parse(sr) -- return namespace
     if #searched == 1 then
         M.input(cWord, bufnr, searched)
     elseif #searched > 1 then
@@ -55,7 +52,7 @@ M.input = function(cWord, mbufnr, searched)
     local width = 60
     local height = 1
     local borderchars =
-    { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+        { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
     local _, win = popup.create(bufnr, {
         title = "Namespace",
@@ -67,9 +64,13 @@ M.input = function(cWord, mbufnr, searched)
         borderchars = borderchars,
     })
 
-    api.nvim_win_set_option(win.border.win_id, "winhl", "Normal:HarpoonBorder")
+    api.nvim_set_option_value(
+        "winhl",
+        "Normal:HarpoonBorder",
+        { win = win.border.win_id }
+    )
 
-    api.nvim_buf_set_option(bufnr, "buftype", "prompt")
+    api.nvim_set_option_value("buftype", "prompt", { buf = bufnr })
     api.nvim_buf_set_keymap(
         bufnr,
         "i",
@@ -86,7 +87,6 @@ M.input = function(cWord, mbufnr, searched)
     )
 
     vim.cmd([[ :startinsert ]])
-
 
     if cWord == "" then
         fn.prompt_setprompt(bufnr, string.format("Class Name > "))
@@ -111,6 +111,5 @@ M.input = function(cWord, mbufnr, searched)
         end)
     end
 end
-
 
 return M

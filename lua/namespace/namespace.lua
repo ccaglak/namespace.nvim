@@ -27,7 +27,7 @@ M.gen = function()
         return
     end
 
-    local prefx = M.pascalCase(prefix[3], '\\\\')
+    local prefx = M.pascalCase(prefix[3], "\\\\")
     path = bpath:gsub(prefix[2], prefx)
 
     -- maybe it make better sense to upper case the first letter of the path
@@ -40,7 +40,9 @@ M.gen = function()
 end
 
 M.pascalCase = function(path, split)
-    if not path then return end
+    if not path then
+        return
+    end
     split = split or "\\"
     local split_path = utils.spliter(path, split)
     local custom_path = ""

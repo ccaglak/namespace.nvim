@@ -47,6 +47,7 @@ M.get_class_names    = function()
     local query = ts.query.parse(
         "php",
         [[
+        (attribute (name) @att)
         (scoped_call_expression scope:(name) @sce)
         (named_type (name) @named)
         (base_clause (name) @extends )
@@ -72,6 +73,7 @@ M.get_class_names    = function()
     return clsNames
 end
 
+-- (namespace_aliasing_clause)
 
 M.get_all_namespaces = function()
     local root, bufnr = M.get_root("php")
@@ -86,6 +88,22 @@ M.get_all_namespaces = function()
     end
     return clsNames
 end
+
+M.get_all_aliases    = function()
+    local root, bufnr = M.get_root("php")
+
+    local query = ts.query.parse("php", [[(namespace_aliasing_clause (name) @alias)]])
+    local clsNames = List({})
+    for n, captures, _ in query:iter_matches(root, bufnr) do
+        local clsName = ts.get_node_text(captures[n], bufnr)
+        if not clsNames:contains(clsName) then
+            clsNames:insert(1, clsName)
+        end
+    end
+    return clsNames
+end
+
+
 
 M.namespaces_in_buffer = function()
     local root, bufnr = M.get_root("php")
@@ -104,7 +122,7 @@ M.namespaces_in_buffer = function()
     return clsNames
 end
 
-M.search_parse = function(sr)
+M.composer_search_parse = function(sr)
     local searched = List({})
     local bufnr = M.create_search_bufnr(sr)
     local root = M.get_root("php", bufnr)
