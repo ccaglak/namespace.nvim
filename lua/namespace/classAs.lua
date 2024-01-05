@@ -70,6 +70,7 @@ M.input = function(cWord, mbufnr, searched)
         { win = win.border.win_id }
     )
 
+<<<<<<< HEAD:lua/namespace/asClass.lua
     api.nvim_set_option_value("buftype", "prompt", { buf = bufnr })
     api.nvim_buf_set_keymap(
         bufnr,
@@ -85,6 +86,11 @@ M.input = function(cWord, mbufnr, searched)
         "<cmd>q!<cr><esc>",
         { noremap = true }
     )
+=======
+    api.nvim_buf_set_option(bufnr, "buftype", "prompt")
+    api.nvim_buf_set_keymap(bufnr, "i", "<esc>", "<cmd>q!<cr><esc>", { noremap = true })
+    api.nvim_buf_set_keymap(bufnr, "n", "<esc>", "<cmd>q!<cr><esc>", { noremap = true })
+>>>>>>> 7af638bf03f0c60a6bb709fe8e548fe9806d36ee:lua/namespace/classAs.lua
 
     vim.cmd([[ :startinsert ]])
 

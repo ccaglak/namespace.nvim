@@ -32,9 +32,13 @@ M.get = function()
     ----
     _G.nspace = gcls.localNamespace() -- get file namespace
     for _, cls in ipairs(allClasses) do
-        gcls.get(cls, mbufnr, true) -- calling get_class
+        gcls.get(cls, mbufnr, true)   -- calling get_class
     end
+<<<<<<< HEAD
     _G.nspace = nil -- reset it here to prevent
+=======
+    _G.nspace = nil                   -- reset it here to prevent
+>>>>>>> 7af638bf03f0c60a6bb709fe8e548fe9806d36ee
 end
 
 return M
