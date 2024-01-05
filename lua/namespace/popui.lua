@@ -89,7 +89,7 @@ M.select_item = function()
     local selectedline = pt[id]
 
     if M.asRequired == true then
-        require("namespace.asClass").input(List({ selectedline }))
+        require("namespace.classAs").input(List({ selectedline }))
         return
     end
     selectedline = "use " .. selectedline .. ";"
