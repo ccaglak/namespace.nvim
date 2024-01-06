@@ -24,7 +24,7 @@ Neovim Php Namespace Resolver
     keys = {
         { "<leader>la", "<cmd>GetClasses<cr>"},
         { "<leader>lc", "<cmd>GetClass<cr>"},
-        { "<leader>ls", "<cmd>AsClass<cr>"},
+        { "<leader>ls", "<cmd>ClassAs<cr>"},
         { "<leader>ln", "<cmd>Namespace<cr>"},
     }
     dependencies = {
@@ -39,7 +39,7 @@ Neovim Php Namespace Resolver
 ```vim
     vim.keymap.set("n", "<leader>la", "<cmd>GetClasses<cr>")
     vim.keymap.set("n", "<leader>lc", "<cmd>GetClass<cr>")
-    vim.keymap.set("n", "<leader>ls", "<cmd>AsClass<cr>")
+    vim.keymap.set("n", "<leader>ls", "<cmd>ClassAs<cr>")
     vim.keymap.set("n", "<leader>ln", "<cmd>Namespace<cr>")
 ```
 
@@ -59,6 +59,7 @@ Neovim Php Namespace Resolver
 
 ## Check Out
 
+phpUtils [phpUtils.nvim](https://github.com/ccaglak/phpUtils.nvim).
 Laravel Goto Blade/Components [larago.nvim](https://github.com/ccaglak/larago.nvim).
 
 
