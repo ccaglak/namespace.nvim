@@ -9,6 +9,9 @@ local bf = require("namespace.buffer")
 local M = {}
 
 M.get = function(cWord, mbufnr, gcs)
+    if  vim.api.nvim_get_option_value("filetype", { buf = 0 }) ~= "php" then
+        return
+    end
     gcs = gcs or false
 
     local used, prefix
@@ -27,10 +30,6 @@ M.get = function(cWord, mbufnr, gcs)
         end
 
         mbufnr = mbufnr or utils.get_bufnr()
-
-        if  vim.api.nvim_get_option_value("filetype", { buf = 0 }) ~= "php" then
-            return
-        end
 
         used = tree.namespaces_in_buffer() --  class
 
