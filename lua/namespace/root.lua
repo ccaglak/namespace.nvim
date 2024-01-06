@@ -2,7 +2,7 @@
 
 local M = {}
 
-M.root_patterns = { ".git", "lua", "vendor", "node_modules" }
+M.root_patterns = { ".git", '.github', "vendor", "node_modules",'package.json' }
 
 function M.root()
     local path = vim.api.nvim_buf_get_name(0)
