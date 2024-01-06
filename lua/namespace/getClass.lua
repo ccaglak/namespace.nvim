@@ -69,21 +69,6 @@ M.get = function(cWord, mbufnr, gcs)
 
     parsed_search_result = M.unique(parsed_search_result) -- unique
 
-    --     _G.ns = M.localNamespace() -- intialized in line 40 and getclasses before after for loop
-    --     this needs to be fixed
-    if #parsed_search_result == 1 and _G.nspace ~= nil then
-        -- local pre = prefix[3]:sub(1, -3):gsub("%\\\\", "\\")
-        -- local same = _G.ns == pre
-        -- if same then
-        local parse = parsed_search_result:unpack()
-        local sp = utils.spliter(parse, "\\")
-        local ns = utils.spliter(_G.nspace, "\\")
-        if #sp - 1 == #ns then
-            return
-        end
-    end
-
-    -----------
 
     if #parsed_search_result == 1 then
         local line = parsed_search_result:unpack()
