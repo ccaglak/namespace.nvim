@@ -30,11 +30,9 @@ M.get = function()
         return
     end
     ----
-    _G.nspace = gcls.localNamespace() -- get file namespace
     for _, cls in ipairs(allClasses) do
         gcls.get(cls, mbufnr, true) -- calling get_class
     end
-    _G.nspace = nil -- reset it here to prevent
 end
 
 return M
