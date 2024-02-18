@@ -59,8 +59,8 @@ Neovim Php Namespace Resolver
 
 ## Check Out
 
-phpUtils [phpUtils.nvim](https://github.com/ccaglak/phpUtils.nvim).
-Laravel Goto Blade/Components [larago.nvim](https://github.com/ccaglak/larago.nvim).
+- PhpTools [phptools.nvim](https://github.com/ccaglak/phptools.nvim).
+- Laravel Goto Blade/Components [larago.nvim](https://github.com/ccaglak/larago.nvim).
 
 
 ## Inspired
