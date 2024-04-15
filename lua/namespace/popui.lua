@@ -5,7 +5,7 @@ local List = require("plenary.collections.py_list")
 local M = {}
 local popup_atts = {} -- stores popup buffer, winid
 local namespaces = {}
-local mbufnr -- main (current) buffer
+local mbufnr          -- main (current) buffer
 
 M.asRequired = false
 
@@ -18,7 +18,7 @@ function M.popup(ret_namespaces, buf, asbool)
         M.pop(unpack(ret_namespaces))
         return
     end
-    local timer = vim.loop.new_timer()
+    local timer = vim.uv.new_timer()
     local co = coroutine.create(function()
         for i, cls in pairs(ret_namespaces) do
             table.insert(namespaces, cls)
@@ -49,7 +49,7 @@ function M.pop(rnamespaces)
     local width = 60
     local height = 10
     local borderchars =
-        { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+    { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 
     local win, _ = popup.create(buf_nr, {
         line = math.floor(((vim.o.lines - height) / 2) - 1),

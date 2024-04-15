@@ -38,7 +38,6 @@ M.get = function(cWord, mbufnr, gcs)
         if #filtered_class == 0 then
             return
         end
-        _G.nspace = M.localNamespace() -- get file namespace
     end
 
     if native:contains(cWord) then

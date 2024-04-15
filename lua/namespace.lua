@@ -1,29 +1,24 @@
 -- main module file
 
-local gcs = require("namespace.getClasses")
-local gc = require("namespace.getClass")
-local as = require("namespace.classAs")
-local ns = require("namespace.namespace")
+if not vim.uv then
+    vim.uv = vim.loop
+end
 
 local M = {}
 M.get_classes = function()
-    gcs.get()
+    require("namespace.getClasses").get()
 end
 
 M.get_class = function()
-    gc.get()
-end
-
-M.sort_classes = function()
-    print("Deprecated: formatters does this feature")
+    require("namespace.getClass").get()
 end
 
 M.class_as = function()
-    as.open()
+    require("namespace.classAs").open()
 end
 
 M.name_space = function()
-    ns.gen()
+    require("namespace.namespace").gen()
 end
 
 

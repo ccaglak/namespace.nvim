@@ -1,6 +1,5 @@
 -- Namespace generator
 
--- local util = require("namespace.utils")
 local ts = require("namespace.treesitter")
 local bf = require("namespace.buffer")
 local utils = require("namespace.utils")
@@ -11,7 +10,7 @@ M.gen = function()
     local root = require("namespace.root").root()
     local path = vim.api.nvim_buf_get_name(0)
 
-    local stat = vim.loop.fs_stat(path) -- linux issue
+    local stat = vim.uv.fs_stat(path) -- linux issue
     if not stat or not stat.type or stat.type ~= "file" then
         path = vim.fn.fnamemodify(path, ":h")
     end

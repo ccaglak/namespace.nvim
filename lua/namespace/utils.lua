@@ -5,12 +5,12 @@ local rt              = require("namespace.root")
 local M               = {}
 
 M.path_sep            = function()
-    local win = vim.loop.os_uname().sysname == 'Darwin' or "Linux"
+    local win = vim.uv.os_uname().sysname == 'Darwin' or "Linux"
     return win and '/' or '\\'
 end
 
 M.absolute            = function()
-    return vim.loop.cwd()
+    return vim.uv.cwd()
 end
 
 ----------------------

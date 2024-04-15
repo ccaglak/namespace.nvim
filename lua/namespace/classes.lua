@@ -182,6 +182,17 @@ local classes = List({
     "mysqli_warning",
     "php_user_filter",
     "stdClass",
+    "Fiber",
+    "WeakReference",
+    "WeakMap",
+    "Stringable",
+    "UnitEnum",
+    "BackedEnum",
+    "SensitiveParameterValue",
+    "ReflectionFiber",
+    "IntlDatePatternGenerator",
+    "CURLStringFile"
+
 })
 
 return classes
