@@ -6,14 +6,14 @@ Neovim Php Namespace Resolver
 
 [![asciicast](https://asciinema.org/a/558130.svg)](https://asciinema.org/a/558130)
 
+## Treesitter php updates might break the plugin if plugin doesn't behave as normal report the as issue.
+
 ## Basic Usage
 
 -   `:GetClasses` Finds all classes, traits, implementations, attributes, from composer or from local search
 -   `:GetClass` gets class under cursor
 -   `:ClassAs` class As -- gets class under cursor or on empty
 -   `:Namespace` generates namespace
-
--   `:SortClass` Depricated -- pass it on to formatters
 
 ## Install
 
@@ -32,6 +32,22 @@ Neovim Php Namespace Resolver
     }
 }
 
+```
+## if you get "Not an Editor Command" error then use
+```lua
+ { -- lazy
+    ft = { 'php' },
+    'ccaglak/namespace.nvim',
+    keys = {
+        { '<leader>lc', '<cmd>lua require("namespace.getClass").get()<cr>',   { desc = 'GetClass' } },
+        { '<leader>la', '<cmd>lua require("namespace.getClasses").get()<cr>', { desc = 'GetClasses' } },
+        { "<leader>ls", '<cmd>lua require("namespace.classAs").open()<cr>', { desc = 'ClassAs' } },
+        { "<leader>ln", '<cmd>lua require("namespace.namespace").gen()<cr>', { desc = 'Generate Namespace' } },
+    },
+   dependencies = {
+        "nvim-lua/plenary.nvim"
+    }
+}
 ```
 
 ## Keymaps -- No default keymaps
