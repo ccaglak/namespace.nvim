@@ -131,7 +131,7 @@ M.composer_search_parse = function(sr)
         [[
 (array_element_initializer
   ((string) @sv1)
-   (binary_expression right: (string (string_value) @sv2 ))
+   (binary_expression right: (string (string_content) @sv2 ))
   )
   ]]
     )
