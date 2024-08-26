@@ -18,7 +18,7 @@ M.class_as = function()
 end
 
 M.name_space = function()
-    require("namespace.namespace").gen()
+    require("namespace.namespace").run()
 end
 
 

@@ -131,13 +131,13 @@ M.composer_search_parse = function(sr)
         [[
 (array_element_initializer
   ((string) @sv1)
-   (binary_expression right: (string (string_value) @sv2 ))
+   (binary_expression right: (string (string_content) @sv2 ))
   )
   ]]
     )
     for _, captures, _ in query:iter_matches(root, bufnr) do
         local ns = ts.get_node_text(captures[1], bufnr)
-        local source = ts.get_node_text(captures[2], bufnr) -- gets the file path for future projects
+        -- local source = ts.get_node_text(captures[2], bufnr) -- gets the file path for future projects
         ns = ns:sub(2):sub(1, -2)
         searched:insert(1, ns)
     end
@@ -188,7 +188,7 @@ M.namespace_prefix = function()
       key: (string (string_content) @psr) (#eq? @psr "psr-4")
       value: (object (pair
           key: (string (string_content) @prefix)
-          value: (string (string_content) @src_path (#match? @src_path "src|app|App/|Src/"))
+          value: (string (string_content) @src_path (#match? @src_path "src/|app/|src|app|App/|Src/"))
       ))
   ) @a
   ]]
