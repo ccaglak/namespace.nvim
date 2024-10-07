@@ -1,4 +1,4 @@
-## Namespace.nvim
+## Namespace.nvim -only tested on nightly
 
 Neovim Php Namespace Resolver
 
