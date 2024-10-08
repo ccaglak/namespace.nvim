@@ -142,8 +142,31 @@ local function async_search_files(pattern, callback)
     return
   end
 
-  local rg_command =
-    { "rg", "--files", "--glob", pattern, "--glob", "!vendor", "--glob", "!node_modules", "--glob", "!.git" }
+  local rg_command = {
+    "rg",
+    "--files",
+    "--glob",
+    pattern,
+    "--glob",
+    "!vendor",
+    "--glob",
+    "!node_modules",
+    "--glob",
+    "!.git",
+    --laravel specific
+    "--glob",
+    "!resources",
+    "--glob",
+    "!storage",
+    "--glob",
+    "!public",
+    "--glob",
+    "!database",
+    "--glob",
+    "!config",
+    "--glob",
+    "!bootstrap",
+  }
 
   vim.system(rg_command, {}, function(obj)
     local results = {}
