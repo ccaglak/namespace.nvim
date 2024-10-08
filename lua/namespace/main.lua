@@ -169,7 +169,8 @@ local function search_autoload_classmap(classes)
     local output = vim.fn.system(rg_command)
     local file_paths = {}
     for line in output:gmatch("[^\r\n]+") do
-      local fqcn, file_path = line:match("'([^']+)'%s*=>%s*%$baseDir%s*%.%s*'([^']+)'")
+      -- local fqcn, _, file_path = line:match("'([^']+)'%s*=>%s*%$(%w+Dir)%s*%.%s*'([^']+)'")
+      local fqcn, file_path = line:match("'([^']+)'%s*=>%s*%$%w+Dir%s*%.%s*'([^']+)'")
       if fqcn and file_path then
         table.insert(file_paths, { fqcn = fqcn, path = file_path })
       end
