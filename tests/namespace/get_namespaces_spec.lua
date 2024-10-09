@@ -44,14 +44,14 @@ describe("mainTest", function()
         "}",
       })
       vim.fn.match
-          .returns(-1)
-          .on_call_with("use Namespace\\Class1;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(-1)
+        .on_call_with("use Namespace\\Class1;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
       vim.fn.match
-          .returns(-1)
-          .on_call_with("use Namespace\\Class2;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(-1)
+        .on_call_with("use Namespace\\Class2;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
       vim.fn.match
-          .returns(0)
-          .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(0)
+        .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
 
       local result = namespace.get_namespaces()
 
@@ -71,15 +71,14 @@ describe("mainTest", function()
         "}",
       })
       vim.fn.match
-          .returns(-1)
-          .on_call_with("use Namespace\\Subnamespace\\Class1;",
-            "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(-1)
+        .on_call_with("use Namespace\\Subnamespace\\Class1;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
       vim.fn.match
-          .returns(-1)
-          .on_call_with("use AnotherNamespace\\Class2;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(-1)
+        .on_call_with("use AnotherNamespace\\Class2;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
       vim.fn.match
-          .returns(0)
-          .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(0)
+        .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
 
       local result = namespace.get_namespaces()
 
@@ -98,11 +97,11 @@ describe("mainTest", function()
         "}",
       })
       vim.fn.match
-          .returns(-1)
-          .on_call_with("use Namespace\\Class1;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(-1)
+        .on_call_with("use Namespace\\Class1;", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
       vim.fn.match
-          .returns(0)
-          .on_call_with("interface TestInterface {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(0)
+        .on_call_with("interface TestInterface {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
 
       local result = namespace.get_namespaces()
 

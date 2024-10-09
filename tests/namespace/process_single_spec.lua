@@ -4,7 +4,6 @@ local stub = require("luassert.stub")
 local ts = mock(require("nvim-treesitter"), true)
 local api = mock(vim.api, true)
 
-
 local function safeRevert(stub)
   if stub and type(stub.revert) == "function" then
     stub:revert()
@@ -39,9 +38,8 @@ describe("mainTest", function()
       namespace.process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
 
       assert
-          .stub(namespace.process_classmap_results)
-          .was_called_with({ { path = "/path/to/TestClass.php" } }, "TestClass", prefix, workspace_root,
-            current_directory, callback)
+        .stub(namespace.process_classmap_results)
+        .was_called_with({ { path = "/path/to/TestClass.php" } }, "TestClass", prefix, workspace_root, current_directory, callback)
       assert.stub(namespace.process_file_search).was_not_called()
     end)
 
@@ -53,8 +51,8 @@ describe("mainTest", function()
 
       assert.stub(namespace.process_classmap_results).was_called()
       assert
-          .stub(namespace.process_file_search)
-          .was_called_with(class_entry, prefix, workspace_root, current_directory, callback)
+        .stub(namespace.process_file_search)
+        .was_called_with(class_entry, prefix, workspace_root, current_directory, callback)
     end)
 
     it("should perform file search when no classmap results are found", function()
@@ -64,8 +62,8 @@ describe("mainTest", function()
 
       assert.stub(namespace.process_classmap_results).was_not_called()
       assert
-          .stub(namespace.process_file_search)
-          .was_called_with(class_entry, prefix, workspace_root, current_directory, callback)
+        .stub(namespace.process_file_search)
+        .was_called_with(class_entry, prefix, workspace_root, current_directory, callback)
     end)
 
     it("should handle non-table classmap results", function()

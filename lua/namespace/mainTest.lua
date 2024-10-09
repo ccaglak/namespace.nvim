@@ -118,7 +118,6 @@ function M.transform_path(path, prefix_table, workspace_root, composer)
     return nil
   end
 
-
   local relative_path = path:gsub(workspace_root, ""):sub(2)
   relative_path = relative_path:gsub("\\\\", "\\")
   relative_path = relative_path:gsub(sep, "\\")
@@ -217,12 +216,12 @@ function M.get_insertion_point()
     end
 
     if
-        line:find("^class")
-        or line:find("^final")
-        or line:find("^interface")
-        or line:find("^abstract")
-        or line:find("^trait")
-        or line:find("^enum")
+      line:find("^class")
+      or line:find("^final")
+      or line:find("^interface")
+      or line:find("^abstract")
+      or line:find("^trait")
+      or line:find("^enum")
     then
       break
     end
@@ -262,7 +261,7 @@ function M.process_file_search(class_entry, prefix, workspace_root, current_dire
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files

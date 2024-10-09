@@ -1,21 +1,27 @@
-local plenary_dir = os.getenv("PLENARY_DIR") or "/tmp/plenary.nvim"
-local is_not_a_directory = vim.fn.isdirectory(plenary_dir) == 0
-if is_not_a_directory then
-  vim.fn.system({ "git", "clone", "https://github.com/nvim-lua/plenary.nvim", plenary_dir })
+local ensure_install = function(plugin)
+  local base_dir = os.getenv("BASE_DIR") or "/tmp/"
+  local plugin_name = vim.split(plugin, "/")[2]
+
+  local plugin_dir = base_dir .. plugin_name
+
+  local plugin_not_exists = vim.fn.isdirectory(plugin_dir) == 0
+  if plugin_not_exists then
+    print("[INFO] Installing " .. plugin_name)
+    vim.fn.system({ "git", "clone", "https://github.com/" .. plugin, plugin_dir })
+  end
+
+  vim.opt.runtimepath:append(plugin_dir)
 end
 
-vim.opt.rtp:append(".")
-vim.opt.rtp:append(plenary_dir)
-local treesitter_dir = "~/.local/share/nvim/lazy/nvim-treesitter"
-vim.opt.rtp:append(treesitter_dir)
+vim.opt.runtimepath:append(".")
+
+ensure_install("nvim-lua/plenary.nvim")
+ensure_install("nvim-treesitter/nvim-treesitter")
 
 vim.cmd("runtime plugin/plenary.vim")
 require("plenary.busted")
-require("nvim-treesitter.query_predicates")
--- local mock = require("luassert.mock")
--- local stub = require("luassert.stub")
-
-_G.dd = function(v)
-  print(vim.inspect(v))
-  return v
-end
+require("nvim-treesitter.configs").setup({
+  ensure_installed = {
+    "php",
+  },
+})
