@@ -1,11 +1,11 @@
-local namespace = require("namespace.mainTest")
+local namespace = require("tests.namespace.mainTest")
 local mock = require("luassert.mock")
 
 describe("mainTest", function()
   describe("transform_path", function()
     local workspace_root = "/home/user/project"
     local prefix_table = {
-      { src = "src", prefix = "App\\" },
+      { src = "src",   prefix = "App\\" },
       { src = "tests", prefix = "Tests\\" },
     }
 

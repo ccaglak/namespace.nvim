@@ -35,7 +35,7 @@ M.class = function()
 end
 
 M.namespace = function()
-  require("namespace.nsgen").resolve()
+  require("lua.namespace.composer").resolve()
 end
 
 return M

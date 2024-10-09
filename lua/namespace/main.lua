@@ -1,7 +1,7 @@
 require("namespace.utils")
 local native = require("namespace.native")
 local Queue = require("namespace.queue")
-local NS = require("namespace.nsgen")
+local com = require("namespace.composer")
 
 local ts = vim.treesitter
 local api = vim.api
@@ -90,18 +90,24 @@ end
 
 -- Get filtered classes
 local function get_filtered_classes()
+  -- get all classes and removes duplicates
   local all_classes = table.remove_duplicates(get_classes_from_tree())
+
   local namespace_classes = get_namespaces()
+
+  -- removes namespace classes from all classes
   local filtered_classes = vim.tbl_filter(function(class)
     return not table.contains2(namespace_classes, class.name)
   end, all_classes)
 
+  -- removes native classes from filtered classes
   local native_classes = vim.tbl_filter(function(class)
     return vim.tbl_contains(native, class.name)
   end, filtered_classes)
 
+  --removes native classes from all classes
   filtered_classes = vim.tbl_filter(function(class)
-    return not vim.tbl_contains(native, class.name)
+    return not table.contains2(native_classes, class.name)
   end, filtered_classes)
 
   return filtered_classes, native_classes
@@ -214,12 +220,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -259,7 +265,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files
@@ -355,7 +361,7 @@ function M.getClass()
   end
 
   local insertion_point = get_insertion_point()
-  local prefix = NS.get_prefix_and_src()
+  local prefix = com.get_prefix_and_src()
   local current_directory = get_current_file_directory()
   local workspace_root = root
   local lines_to_insert = {}
@@ -384,7 +390,7 @@ function M.getClasses()
   end
 
   local insertion_point = get_insertion_point()
-  local prefix = NS.get_prefix_and_src()
+  local prefix = com.get_prefix_and_src()
   local workspace_root = root
   local lines_to_insert = {}
   local current_directory = get_current_file_directory()

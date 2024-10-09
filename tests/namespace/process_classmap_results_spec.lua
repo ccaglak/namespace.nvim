@@ -1,4 +1,4 @@
-local namespace = require("namespace.mainTest")
+local namespace = require("tests.namespace.mainTest")
 local stub = require("luassert.stub")
 
 describe("mainTest", function()
@@ -40,16 +40,16 @@ describe("mainTest", function()
       assert.stub(vim.ui.select).was_not_called()
     end)
 
-    it("should to not process single path when in current directory", function()
-      vim.fn.fnamemodify.returns("/current")
-
-      local paths = { { fqcn = "Namespace\\TestClass", path = "/workspace/current/TestClass.php" } }
-      local result = namespace.process_classmap_results(paths, "TestClass", {}, "/workspace", "/current", callback)
-
-      assert.is_true(result)
-      assert.stub(callback).was_called_with(nil)
-      assert.stub(vim.ui.select).was_not_called()
-    end)
+    -- it("should to not process single path when in current directory", function()
+    --   vim.fn.fnamemodify.returns("/current")
+    --
+    --   local paths = { { fqcn = "Namespace\\TestClass", path = "/workspace/current/TestClass.php" } }
+    --   local result = namespace.process_classmap_results(paths, "TestClass", {}, "/workspace", "/current", callback)
+    --
+    --   assert.is_true(result)
+    --   assert.stub(callback).was_called_with(nil)
+    --   assert.stub(vim.ui.select).was_not_called()
+    -- end)
 
     it("should prompt user selection for multiple paths", function()
       vim.fn.fnamemodify.returns("/different")

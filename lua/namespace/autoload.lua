@@ -1,6 +1,6 @@
 local M = {}
 local main = require("namespace.main")
-local ns = require("namespace.nsgen")
+local ns = require("namespace.composer")
 
 local function has_composer_json()
   local workspace_root = vim.fs.root(0, { "composer.json", ".git", "vendor" })

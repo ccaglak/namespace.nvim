@@ -1,4 +1,4 @@
-local namespace = require("namespace.mainTest")
+local namespace = require("tests.namespace.mainTest")
 local stub = require("luassert.stub")
 
 describe("mainTest", function()

@@ -135,4 +135,4 @@ return M
 --     sort_type = 'natural',
 --     remove_duplicates = true
 -- }
--- sort.sortUseStatements(config, 'ascending')  -- This will use 'ascending' sort instead of 'natural'
+-- sort.sortUseStatements(config, 'ascending')

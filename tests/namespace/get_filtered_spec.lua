@@ -1,8 +1,5 @@
-local namespace = require("namespace.mainTest")
-local mock = require("luassert.mock")
+local namespace = require("tests.namespace.mainTest")
 local stub = require("luassert.stub")
-local ts = mock(require("nvim-treesitter"), true)
-local api = mock(vim.api, true)
 
 describe("mainTest", function()
   describe("get_filtered_classes", function()

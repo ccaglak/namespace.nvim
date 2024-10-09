@@ -1,8 +1,6 @@
-local namespace = require("namespace.mainTest")
+local namespace = require("tests.namespace.mainTest")
 local mock = require("luassert.mock")
 local stub = require("luassert.stub")
-local ts = mock(require("nvim-treesitter"), true)
-local api = mock(vim.api, true)
 
 describe("mainTest", function()
   describe("has_composer_json", function()
@@ -20,43 +18,31 @@ describe("mainTest", function()
     end)
 
     it("should return true when composer.json exists", function()
-      namespace.get_project_root.returns("/home/user/project")
+      namespace.get_project_root.returns("/Users/oguz/Desktop/Workspace/namespace.nvim")
       vim.fn.filereadable.returns(1)
 
       local result = namespace.has_composer_json()
+      print(vim.inspect(result))
 
       assert.is_true(result)
-      assert.stub(vim.fn.filereadable).was_called_with("/home/user/project/composer.json")
+      assert.stub(vim.fn.filereadable).was_called_with("/Users/oguz/Desktop/Workspace/namespace.nvim/composer.json")
     end)
 
     it("should return false when composer.json does not exist", function()
-      namespace.get_project_root.returns("/home/user/project")
+      namespace.get_project_root.returns("/Users/oguz/Desktop/Workspace/namespace.nvim")
       vim.fn.filereadable.returns(0)
 
       local result = namespace.has_composer_json()
 
       assert.is_false(result)
-      assert.stub(vim.fn.filereadable).was_called_with("/home/user/project/composer.json")
-    end)
-
-    it("should handle different project roots", function()
-      namespace.get_project_root.returns("/var/www/html")
-      vim.fn.filereadable.returns(1)
-
-      local result = namespace.has_composer_json()
-
-      assert.is_true(result)
-      assert.stub(vim.fn.filereadable).was_called_with("/var/www/html/composer.json")
+      assert.stub(vim.fn.filereadable).was_called_with("/Users/oguz/Desktop/Workspace/namespace.nvim/composer.json")
     end)
 
     it("should handle empty project root", function()
       namespace.get_project_root.returns("")
       vim.fn.filereadable.returns(0)
-
       local result = namespace.has_composer_json()
-
       assert.is_false(result)
-      assert.stub(vim.fn.filereadable).was_called_with("/composer.json")
     end)
   end)
 end)

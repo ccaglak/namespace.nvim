@@ -1,3 +1,10 @@
+-- vim.fn.expand("%:p")   -- Filepath
+-- vim.fn.expand("%:~")   -- FilepathWithTilde
+-- vim.fn.expand("%:t")   -- Filename
+-- vim.fn.expand("%:.")   -- RelativePath
+-- vim.fn.expand("%:p:h") -- DirectoryPath
+-- vim.fn.expand("%:.:h") -- RelativeDirectoryPath
+
 -- dont use -- custom to get_filtered_classes()
 -- remore when possible
 function table.contains2(t, value) -- tobe removed in future

@@ -77,15 +77,21 @@ function N.get_prefix_and_src()
 end
 
 function N.get_insertion_point()
-  local content = api.nvim_buf_get_lines(0, 0, -1, false)
-  local insertion_point = 2
+  local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local insertion_point = nil
 
   for i, line in ipairs(content) do
-    if vim.fn.match(line, "^\\(declare\\)") >= 0 then
+    if line:find("^declare") then
       insertion_point = i
-    elseif vim.fn.match(line, "^\\(namespace\\)") >= 0 then
-      return i, vim.fn.match(line, "^\\(namespace\\)")
-    elseif vim.fn.match(line, "^\\(use\\|class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") >= 0 then
+    elseif line:find("^namespace") then
+      return i, line:find("^namespace")
+    elseif line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
+    then
       return insertion_point
     end
   end

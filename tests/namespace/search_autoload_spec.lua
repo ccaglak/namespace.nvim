@@ -1,4 +1,4 @@
-local namespace = require("namespace.mainTest")
+local namespace = require("tests.namespace.mainTest")
 local mock = require("luassert.mock")
 local stub = require("luassert.stub")
 
@@ -36,8 +36,9 @@ describe("mainTest", function()
 
       assert.same({ Class = { { fqcn = "Namespace\\Class", path = "/src/Class.php" } } }, result)
       assert
-        .stub(vim.fn.system)
-        .was_called_with("rg '/Class.php' /Users/oguz/Desktop/Workspace/namespace.nvim/vendor/composer/autoload_classmap.php")
+          .stub(vim.fn.system)
+          .was_called_with(
+          "rg '/Class.php' /Users/oguz/Desktop/Workspace/namespace.nvim/vendor/composer/autoload_classmap.php")
     end)
 
     it("should handle classes with no matches", function()
@@ -60,7 +61,7 @@ describe("mainTest", function()
 
       assert.same({
         Class = {
-          { fqcn = "Namespace\\Class", path = "/src/Class.php" },
+          { fqcn = "Namespace\\Class",        path = "/src/Class.php" },
           { fqcn = "AnotherNamespace\\Class", path = "/vendor/package/src/Class.php" },
         },
       }, result)
@@ -78,7 +79,7 @@ malformed line
 
       assert.same({
         Class = {
-          { fqcn = "Namespace\\Class", path = "/src/Class.php" },
+          { fqcn = "Namespace\\Class",        path = "/src/Class.php" },
           { fqcn = "AnotherNamespace\\Class", path = "/vendor/package/src/Class.php" },
         },
       }, result)
