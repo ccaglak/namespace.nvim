@@ -28,8 +28,6 @@ function N.resolve_namespace()
   local current_dir = vim.fn.expand("%:h")
   current_dir = current_dir:gsub(root, ""):gsub(sep, "\\")
 
-  -- P(current_dir)
-
   for _, entry in ipairs(prefix_and_src or {}) do
     if current_dir:find(entry.src:sub(1, -1)) ~= nil then
       return parse(current_dir:gsub(entry.src, entry.prefix))

@@ -15,14 +15,14 @@ local cache = {
   treesitter_queries = {},
 }
 
-local function get_project_root()
+function M.get_project_root()
   return vim.fs.root(0, { "composer.json", ".git", "vendor" }) or vim.uv.cwd()
 end
 
-local function get_current_file_directory()
+function M.get_current_file_directory()
   local current_file = vim.fn.expand("%:p")
   current_file = vim.fn.fnamemodify(current_file, ":h")
-  return current_file:gsub(get_project_root(), "")
+  return current_file:gsub(M.get_project_root(), "")
 end
 
 -- Performance optimization: Cache treesitter query
@@ -35,7 +35,7 @@ local function get_cached_query(language, query_string)
 end
 
 -- Get classes from the current buffer using treesitter
-local function get_classes_from_tree(bufnr)
+function M.get_classes_from_tree(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   local language_tree = ts.get_parser(bufnr, "php")
   if language_tree == nil then
@@ -69,14 +69,14 @@ local function get_classes_from_tree(bufnr)
   return declarations
 end
 
-local root = get_project_root()
+local root = M.get_project_root()
 
 -- Get namespaces from the current buffer
-local function get_namespaces()
+function M.get_namespaces()
   local php_code = api.nvim_buf_get_lines(0, 0, 50, false)
   local use_statements = {}
   for _, line in ipairs(php_code) do
-    if vim.fn.match(line, "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") > 0 then
+    if vim.fn.match(line, "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") > 0 then -----
       return use_statements
     end
     local use_match = line:match("^use%s+(.+);$")
@@ -89,9 +89,9 @@ local function get_namespaces()
 end
 
 -- Get filtered classes
-local function get_filtered_classes()
-  local all_classes = table.remove_duplicates(get_classes_from_tree())
-  local namespace_classes = get_namespaces()
+function M.get_filtered_classes()
+  local all_classes = table.remove_duplicates(M.get_classes_from_tree())
+  local namespace_classes = M.get_namespaces()
   local filtered_classes = vim.tbl_filter(function(class)
     return not table.contains2(namespace_classes, class.name)
   end, all_classes)
@@ -107,22 +107,23 @@ local function get_filtered_classes()
   return filtered_classes, native_classes
 end
 
-local function has_composer_json()
+function M.has_composer_json()
   local composer_json_path = root .. "/composer.json"
   return vim.fn.filereadable(composer_json_path) == 1
 end
 
 -- Transform file path to use statement ---
-local function transform_path(path, prefix_table, workspace_root, composer)
+function M.transform_path(path, prefix_table, workspace_root, composer)
   if not path then
     return nil
   end
 
-  local relative_path = path:gsub(workspace_root, "")
-  relative_path = relative_path:gsub("^" .. sep, "") -- first slash
+
+  local relative_path = path:gsub(workspace_root, ""):sub(2)
   relative_path = relative_path:gsub("\\\\", "\\")
   relative_path = relative_path:gsub(sep, "\\")
   relative_path = relative_path:gsub("%.php$", "") -- Remove .php extension
+  relative_path = relative_path:gsub("^/", "")
   relative_path = "use " .. relative_path .. ";"
 
   if not composer then
@@ -137,7 +138,7 @@ local function transform_path(path, prefix_table, workspace_root, composer)
   return relative_path
 end
 
-local function async_search_files(pattern, callback)
+function M.async_search_files(pattern, callback)
   if cache.file_search_results[pattern] then
     callback(cache.file_search_results[pattern])
     return
@@ -184,7 +185,7 @@ local function async_search_files(pattern, callback)
 end
 
 -- Search for multiple classes in autoload_classmap.php
-local function search_autoload_classmap(classes)
+function M.search_autoload_classmap(classes)
   local classmap_path = root .. string.format("%svendor%scomposer%sautoload_classmap.php", sep, sep, sep)
   local results = {}
 
@@ -204,7 +205,9 @@ local function search_autoload_classmap(classes)
   return results
 end
 
-local function get_insertion_point()
+function M.get_insertion_point()
+  -- local lastline = vim.api.nvim_buf_line_count(bufnr)
+  -- TODO dont want to read whole file 1/4
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local insertion_point = nil
 
@@ -228,7 +231,7 @@ local function get_insertion_point()
   return insertion_point or 2
 end
 
-local function process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
+function M.process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
   if #paths > 1 then
     vim.ui.select(paths, {
       prompt = "Select the appropriate path for " .. class_name,
@@ -237,14 +240,14 @@ local function process_classmap_results(paths, class_name, prefix, workspace_roo
       end,
     }, function(choice)
       if choice and vim.fn.fnamemodify(choice.path, ":h") ~= current_directory then
-        local use_statement = transform_path(choice.fqcn, prefix, workspace_root, true)
+        local use_statement = M.transform_path(choice.fqcn, prefix, workspace_root, true)
         callback(use_statement)
       else
         callback(nil)
       end
     end)
   elseif #paths == 1 and vim.fn.fnamemodify(paths[1].path, ":h") ~= current_directory then
-    local use_statement = transform_path(paths[1].fqcn, prefix, workspace_root, true)
+    local use_statement = M.transform_path(paths[1].fqcn, prefix, workspace_root, true)
     callback(use_statement)
   else
     return false
@@ -252,8 +255,8 @@ local function process_classmap_results(paths, class_name, prefix, workspace_roo
   return true
 end
 
-local function process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
-  async_search_files(class_entry.name .. ".php", function(files)
+function M.process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
+  M.async_search_files(class_entry.name .. ".php", function(files)
     local matching_files
 
     if files and #files == 1 then
@@ -266,7 +269,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     end
 
     matching_files = vim.tbl_map(function(file)
-      return transform_path(file, prefix, workspace_root)
+      return M.transform_path(file, prefix, workspace_root)
     end, matching_files)
 
     if #matching_files == 1 then
@@ -285,20 +288,20 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
   end)
 end
 
-local function process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
-  local classmap_results = search_autoload_classmap({ class_entry })
+function M.process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
+  local classmap_results = M.search_autoload_classmap({ class_entry })
   if classmap_results[class_entry.name] then
     local paths = classmap_results[class_entry.name]
     if type(paths) == "table" then
-      if process_classmap_results(paths, class_entry.name, prefix, workspace_root, current_directory, callback) then
+      if M.process_classmap_results(paths, class_entry.name, prefix, workspace_root, current_directory, callback) then
         return
       end
     end
   end
-  process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
+  M.process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
 end
 
-local function process_class_queue(queue, prefix, workspace_root, current_directory, callback)
+function M.process_class_queue(queue, prefix, workspace_root, current_directory, callback)
   local use_statements = {}
 
   local function process_next()
@@ -308,7 +311,7 @@ local function process_class_queue(queue, prefix, workspace_root, current_direct
     end
 
     local class_entry = queue:pop()
-    process_single_class(class_entry, prefix, workspace_root, current_directory, function(use_statement)
+    M.process_single_class(class_entry, prefix, workspace_root, current_directory, function(use_statement)
       if use_statement then
         table.insert(use_statements, use_statement)
       end
@@ -320,7 +323,7 @@ local function process_class_queue(queue, prefix, workspace_root, current_direct
 end
 
 function M.getClass()
-  if not has_composer_json() then
+  if not M.has_composer_json() then
     vim.notify("composer.json not found ", vim.log.levels.WARN, { title = "PhpNamespace" })
     return
   end
@@ -331,7 +334,7 @@ function M.getClass()
     return
   end
 
-  local existing_namespaces = get_namespaces()
+  local existing_namespaces = M.get_namespaces()
   for _, ns in ipairs(existing_namespaces) do
     if ns.name == word_under_cursor then
       vim.notify("Class '" .. word_under_cursor .. "' is already used", vim.log.levels.INFO, { title = "PhpNamespace" })
@@ -340,7 +343,7 @@ function M.getClass()
   end
 
   if vim.tbl_contains(native, word_under_cursor) then
-    local insertion_point = get_insertion_point()
+    local insertion_point = M.get_insertion_point()
     local use_statement = "use " .. word_under_cursor .. ";"
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, { use_statement })
     vim.notify("Added native class: " .. word_under_cursor, vim.log.levels.INFO, { title = "PhpNamespace" })
@@ -354,9 +357,9 @@ function M.getClass()
     return
   end
 
-  local insertion_point = get_insertion_point()
+  local insertion_point = M.get_insertion_point()
   local prefix = NS.get_prefix_and_src()
-  local current_directory = get_current_file_directory()
+  local current_directory = M.get_current_file_directory()
   local workspace_root = root
   local lines_to_insert = {}
 
@@ -365,29 +368,29 @@ function M.getClass()
     class_queue:push(class_entry)
   end
 
-  process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
+  M.process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
   end)
 end
 
 function M.getClasses()
-  if not has_composer_json() then
+  if not M.has_composer_json() then
     vim.notify("composer.json not found ", vim.log.levels.WARN, { title = "PhpNamespace" })
     return
   end
 
-  local filtered_classes, native_classes = get_filtered_classes()
+  local filtered_classes, native_classes = M.get_filtered_classes()
   if not filtered_classes then
     vim.notify("No classes found to process", vim.log.levels.WARN, { title = "PhpNamespace" })
     return
   end
 
-  local insertion_point = get_insertion_point()
+  local insertion_point = M.get_insertion_point()
   local prefix = NS.get_prefix_and_src()
   local workspace_root = root
   local lines_to_insert = {}
-  local current_directory = get_current_file_directory()
+  local current_directory = M.get_current_file_directory()
 
   -- Process native classes
   for _, native_class in ipairs(native_classes) do
@@ -400,7 +403,7 @@ function M.getClasses()
     class_queue:push(class_entry)
   end
 
-  process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
+  M.process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
   end)

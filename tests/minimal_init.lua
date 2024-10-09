@@ -6,6 +6,16 @@ end
 
 vim.opt.rtp:append(".")
 vim.opt.rtp:append(plenary_dir)
+local treesitter_dir = "~/.local/share/nvim/lazy/nvim-treesitter"
+vim.opt.rtp:append(treesitter_dir)
 
 vim.cmd("runtime plugin/plenary.vim")
 require("plenary.busted")
+require("nvim-treesitter.query_predicates")
+-- local mock = require("luassert.mock")
+-- local stub = require("luassert.stub")
+
+_G.dd = function(v)
+  print(vim.inspect(v))
+  return v
+end
