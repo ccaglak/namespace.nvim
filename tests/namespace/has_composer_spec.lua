@@ -18,11 +18,11 @@ describe("mainTest", function()
     end)
 
     it("should return true when composer.json exists", function()
-      namespace.get_project_root.returns("/Users/oguz/Desktop/Workspace/namespace.nvim")
+      namespace.get_project_root.returns("/home/runner/work/namespace.nvim/namespace.nvim")
       vim.fn.filereadable.returns(1)
 
       local result = namespace.has_composer_json()
-      assert.stub(vim.fn.filereadable).was_called_with("/Users/oguz/Desktop/Workspace/namespace.nvim/composer.json")
+      assert.stub(vim.fn.filereadable).was_called_with("/home/runner/work/namespace.nvim/namespace.nvim/composer.json")
       assert.is_true(result)
     end)
 
