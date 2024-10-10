@@ -11,6 +11,7 @@ local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
 
 -- Cache for frequently accessed data
 local cache = {
+  root = {},
   file_search_results = {},
   treesitter_queries = {},
 }

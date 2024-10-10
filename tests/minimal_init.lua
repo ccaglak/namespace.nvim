@@ -18,7 +18,7 @@ vim.opt.runtimepath:append(".")
 ensure_install("nvim-lua/plenary.nvim")
 ensure_install("nvim-treesitter/nvim-treesitter")
 
-vim.cmd("runtime plugin/plenary.vim")
+
 require("plenary.busted")
 require("nvim-treesitter.configs").setup({
   ensure_installed = {

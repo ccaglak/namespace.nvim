@@ -45,7 +45,7 @@ describe("mainTest", function()
       namespace.get_namespaces.returns({
         { name = "Class2", ns = "Namespace\\Class2" },
       })
-      table.contains2.returns(false).on_call_with({ { name = "Class2", ns = "Namespace\\Class2" } }, "Class1")
+      table.contains2.returns(false).on_call_with({ { name = "Class3", ns = "Namespace\\Class2" } }, "Class1")
       table.contains2.returns(true).on_call_with({ { name = "Class2", ns = "Namespace\\Class2" } }, "Class2")
       table.contains2.returns(false).on_call_with({ { name = "Class2", ns = "Namespace\\Class2" } }, "NativeClass")
       table.contains2.returns(false).on_call_with({ { name = "Class2", ns = "Namespace\\Class2" } }, "Class3")

@@ -92,7 +92,7 @@ function N.get_insertion_point()
         or line:find("^trait")
         or line:find("^enum")
     then
-      return insertion_point
+      return i - 1, nil -- insert before class
     end
   end
 

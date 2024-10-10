@@ -1,4 +1,4 @@
-## Namespace.nvim V2
+## Namespace.nvim V2 #BETA
 
 Neovim Php Namespace Resolver
 

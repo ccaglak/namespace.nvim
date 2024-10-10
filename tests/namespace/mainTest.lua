@@ -398,8 +398,10 @@ function M.getClasses()
   local current_directory = M.get_current_file_directory()
 
   -- Process native classes
-  for _, native_class in ipairs(native_classes) do
-    table.insert(lines_to_insert, "use " .. native_class.name .. ";")
+  if native_classes then
+    for _, native_class in ipairs(native_classes) do
+      table.insert(lines_to_insert, "use " .. native_class.name .. ";")
+    end
   end
 
   -- Create a queue for processing filtered classes

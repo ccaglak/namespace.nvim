@@ -176,7 +176,7 @@ describe("composer", function()
       })
       local result = namespace.get_prefix_and_src()
       assert.are.same({
-        { prefix = "App\\", src = "app/" },
+        { prefix = "App\\",   src = "app/" },
         { prefix = "Tests\\", src = "tests/" },
       }, result)
     end)
@@ -192,7 +192,7 @@ describe("composer", function()
       })
       local result = namespace.get_prefix_and_src()
       assert.are.same({
-        { prefix = "App\\", src = "app/" },
+        { prefix = "App\\",  src = "app/" },
         { prefix = "Core\\", src = "core/" },
       }, result)
     end)
@@ -206,7 +206,6 @@ describe("composer", function()
     end)
   end)
 end)
-
 describe("composer", function()
   describe("get_insertion_point", function()
     local original_nvim_buf_get_lines
@@ -220,114 +219,139 @@ describe("composer", function()
       vim.api.nvim_buf_get_lines = original_nvim_buf_get_lines
     end)
 
-    it("should return the line number and position of 'namespace' when found", function()
+    it("should return insertion point before namespace", function()
       vim.api.nvim_buf_get_lines.returns({
         "<?php",
         "",
-        "namespace App\\Controller;",
+        "namespace App\\Test;",
         "",
-        "class UserController",
+        "class TestClass",
+        "{",
+        "}"
       })
 
-      local line, pos = namespace.get_insertion_point()
+      local line, col = namespace.get_insertion_point()
 
-      assert.equals(3, line)
-      assert.equals(1, pos)
+      assert.are.equal(3, line)
+      assert.are.equal(1, col)
     end)
 
-    it("should return the line number after 'declare' statements for class/interface/trait", function()
+    it("should return insertion point before class when no namespace is present", function()
+      vim.api.nvim_buf_get_lines.returns({
+        "<?php",
+        "",
+        "class TestClass",
+        "{",
+        "}"
+      })
+
+      local line, col = namespace.get_insertion_point()
+
+      assert.are.equal(2, line)
+      assert.is_nil(col)
+    end)
+
+    it("should return insertion point after declare statement", function()
       vim.api.nvim_buf_get_lines.returns({
         "<?php",
         "",
         "declare(strict_types=1);",
         "",
-        "class UserController",
+        "namespace App\\Test;",
+        "",
+        "class TestClass",
+        "{",
+        "}"
       })
 
-      local line = namespace.get_insertion_point()
+      local line, col = namespace.get_insertion_point()
 
-      assert.equals(3, line)
+      assert.are.equal(5, line)
+      assert.are.equal(1, col)
     end)
 
-    it("should return nil when no relevant statements are found", function()
+    it("should return insertion point before interface", function()
       vim.api.nvim_buf_get_lines.returns({
         "<?php",
         "",
-        "// Some comments",
-        "function helper() {",
-        "    // ...",
-        "}",
+        "interface TestInterface",
+        "{",
+        "}"
       })
 
-      local line, pos = namespace.get_insertion_point()
+      local line, col = namespace.get_insertion_point()
+
+      assert.are.equal(2, line)
+      assert.is_nil(col)
+    end)
+
+    it("should return insertion point before abstract class", function()
+      vim.api.nvim_buf_get_lines.returns({
+        "<?php",
+        "",
+        "abstract class AbstractTest",
+        "{",
+        "}"
+      })
+
+      local line, col = namespace.get_insertion_point()
+
+      assert.are.equal(2, line)
+      assert.is_nil(col)
+    end)
+
+    it("should return insertion point before trait", function()
+      vim.api.nvim_buf_get_lines.returns({
+        "<?php",
+        "",
+        "trait TestTrait",
+        "{",
+        "}"
+      })
+
+      local line, col = namespace.get_insertion_point()
+
+      assert.are.equal(2, line)
+      assert.is_nil(col)
+    end)
+
+    it("should return insertion point before enum", function()
+      vim.api.nvim_buf_get_lines.returns({
+        "<?php",
+        "",
+        "enum TestEnum",
+        "{",
+        "}"
+      })
+
+      local line, col = namespace.get_insertion_point()
+
+      assert.are.equal(2, line)
+      assert.is_nil(col)
+    end)
+
+    it("should return nil when file is empty", function()
+      vim.api.nvim_buf_get_lines.returns({})
+
+      local line, col = namespace.get_insertion_point()
 
       assert.is_nil(line)
-      assert.is_nil(pos)
+      assert.is_nil(col)
     end)
 
-    it("should handle multiple declare statements", function()
+    it("should return insertion point before final class", function()
       vim.api.nvim_buf_get_lines.returns({
         "<?php",
         "",
-        "declare(strict_types=1);",
-        "declare(ticks=1);",
-        "",
-        "final class UserController",
+        "final class FinalTest",
+        "{",
+        "}"
       })
 
-      local line = namespace.get_insertion_point()
+      local line, col = namespace.get_insertion_point()
 
-      assert.equals(4, line)
-    end)
-
-    it("should return the correct line for abstract class declaration", function()
-      vim.api.nvim_buf_get_lines.returns({
-        "<?php",
-        "",
-        "declare(strict_types=1);",
-        "",
-        "abstract class BaseController",
-      })
-
-      local line = namespace.get_insertion_point()
-
-      assert.equals(3, line)
-    end)
-
-    it("should return the correct line for interface declaration", function()
-      vim.api.nvim_buf_get_lines.returns({
-        "<?php",
-        "",
-        "interface UserRepositoryInterface",
-      })
-
-      local line = namespace.get_insertion_point()
-
-      assert.is_nil(line)
-    end)
-
-    it("should return the correct line for trait declaration", function()
-      vim.api.nvim_buf_get_lines.returns({
-        "<?php",
-        "",
-        "trait LoggableTrait",
-      })
-
-      local line = namespace.get_insertion_point()
-
-      assert.is_nil(line)
-    end)
-
-    it("should return the correct line for enum declaration", function()
-      vim.api.nvim_buf_get_lines.returns({
-        "<?php",
-        "",
-        "enum UserStatus",
-      })
-
-      local line = namespace.get_insertion_point()
-
-      assert.is_nil(line)
+      assert.are.equal(2, line)
+      assert.is_nil(col)
     end)
   end)
 end)
