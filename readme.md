@@ -25,7 +25,9 @@ Neovim Php Namespace Resolver
         { "<leader>ln", "<cmd>Php namespace<cr>"},
     },
     dependencies = {
-        "nvim-lua/plenary.nvim"
+        "nvim-lua/plenary.nvim",
+        "ccaglak/phptools.nvim", -- optional
+        "ccaglak/larago.nvim", -- optional
     }
 }
 
@@ -39,7 +41,6 @@ Neovim Php Namespace Resolver
 
 ## Requires
 
--   pleanery.nvim
 -   nvim-treesitter (`:TSInstall php json`)
 -   brew install ripgrep
 
