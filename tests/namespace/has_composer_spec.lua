@@ -22,10 +22,8 @@ describe("mainTest", function()
       vim.fn.filereadable.returns(1)
 
       local result = namespace.has_composer_json()
-      print(vim.inspect(result))
-
-      assert.is_true(result)
       assert.stub(vim.fn.filereadable).was_called_with("/Users/oguz/Desktop/Workspace/namespace.nvim/composer.json")
+      assert.is_true(result)
     end)
 
     it("should return false when composer.json does not exist", function()

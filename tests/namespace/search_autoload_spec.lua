@@ -34,7 +34,7 @@ describe("mainTest", function()
 
       local result = namespace.search_autoload_classmap({ { name = "Class" } })
 
-      assert.same({ Class = { { fqcn = "Namespace\\Class", path = "/src/Class.php" } } }, result)
+      assert.are.same({ Class = { { fqcn = "Namespace\\Class", path = "/src/Class.php" } } }, result)
       assert
         .stub(vim.fn.system)
         .was_called_with("rg '/Class.php' /Users/oguz/Desktop/Workspace/namespace.nvim/vendor/composer/autoload_classmap.php")
