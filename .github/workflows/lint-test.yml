@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nvim-versions: ['nightly']
+        nvim-versions: [ 'stable', 'nightly']
     name: test
     steps:
       - name: checkout
