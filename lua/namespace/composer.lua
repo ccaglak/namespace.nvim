@@ -85,12 +85,13 @@ function N.get_insertion_point()
       insertion_point = i
     elseif line:find("^namespace") then
       return i, line:find("^namespace")
-    elseif line:find("^class")
-        or line:find("^final")
-        or line:find("^interface")
-        or line:find("^abstract")
-        or line:find("^trait")
-        or line:find("^enum")
+    elseif
+      line:find("^class")
+      or line:find("^final")
+      or line:find("^interface")
+      or line:find("^abstract")
+      or line:find("^trait")
+      or line:find("^enum")
     then
       return i - 1, nil -- insert before class
     end

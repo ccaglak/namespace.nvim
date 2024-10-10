@@ -30,12 +30,12 @@ describe("utils", function()
         { name = "a", value = 1 },
         { name = "b", value = 2 },
         { name = "a", value = 3 },
-        { name = "c", value = 4 }
+        { name = "c", value = 4 },
       }
       local expected = {
         { name = "a", value = 1 },
         { name = "b", value = 2 },
-        { name = "c", value = 4 }
+        { name = "c", value = 4 },
       }
       assert.same(expected, table.remove_duplicates(input))
     end)
@@ -48,7 +48,7 @@ describe("utils", function()
       local input = {
         { name = "a", value = 1 },
         { name = "b", value = 2 },
-        { name = "c", value = 3 }
+        { name = "c", value = 3 },
       }
       assert.same(input, table.remove_duplicates(input))
     end)
@@ -58,11 +58,11 @@ describe("utils", function()
         { name = "a", value = 1 },
         { name = "a", value = 2 },
         { name = "b", value = 3 },
-        { name = "a", value = 4 }
+        { name = "a", value = 4 },
       }
       local expected = {
         { name = "a", value = 1 },
-        { name = "b", value = 3 }
+        { name = "b", value = 3 },
       }
       assert.same(expected, table.remove_duplicates(input))
     end)

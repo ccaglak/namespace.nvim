@@ -39,11 +39,11 @@ vim.api.nvim_create_user_command("Php", my_cmd, {
     if cmdline:match("^['<,'>]*Php[!]*%s+%w*$") then
       local subcommand_keys = vim.tbl_keys(subcommand_tbl)
       return vim
-          .iter(subcommand_keys)
-          :filter(function(key)
-            return key:find(arg_lead) ~= nil
-          end)
-          :totable()
+        .iter(subcommand_keys)
+        :filter(function(key)
+          return key:find(arg_lead) ~= nil
+        end)
+        :totable()
     end
   end,
   bang = true,

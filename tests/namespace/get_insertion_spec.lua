@@ -45,8 +45,8 @@ describe("mainTest", function()
       vim.fn.match.returns(0).on_call_with("use Namespace\\Class1;", "^\\(declare\\|namespace\\|use\\)")
       vim.fn.match.returns(0).on_call_with("use Namespace\\Class2;", "^\\(declare\\|namespace\\|use\\)")
       vim.fn.match
-          .returns(0)
-          .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(0)
+        .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
 
       local result = namespace.get_insertion_point()
       assert.are.equal(4, result)
@@ -65,8 +65,8 @@ describe("mainTest", function()
       vim.fn.match.returns(0).on_call_with("namespace App\\Controller;", "^\\(declare\\|namespace\\|use\\)")
       vim.fn.match.returns(0).on_call_with("use Namespace\\Class1;", "^\\(declare\\|namespace\\|use\\)")
       vim.fn.match
-          .returns(0)
-          .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(0)
+        .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
 
       local result = namespace.get_insertion_point()
 
@@ -86,8 +86,8 @@ describe("mainTest", function()
       vim.fn.match.returns(0).on_call_with("declare(strict_types=1);", "^\\(declare\\|namespace\\|use\\)")
       vim.fn.match.returns(0).on_call_with("namespace App\\Controller;", "^\\(declare\\|namespace\\|use\\)")
       vim.fn.match
-          .returns(0)
-          .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(0)
+        .on_call_with("class TestClass {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
 
       local result = namespace.get_insertion_point()
 
@@ -104,8 +104,8 @@ describe("mainTest", function()
       })
       vim.fn.match.returns(0).on_call_with("use Namespace\\Class1;", "^\\(declare\\|namespace\\|use\\)")
       vim.fn.match
-          .returns(0)
-          .on_call_with("interface TestInterface {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
+        .returns(0)
+        .on_call_with("interface TestInterface {", "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)")
 
       local result = namespace.get_insertion_point()
 

@@ -176,7 +176,7 @@ describe("composer", function()
       })
       local result = namespace.get_prefix_and_src()
       assert.are.same({
-        { prefix = "App\\",   src = "app/" },
+        { prefix = "App\\", src = "app/" },
         { prefix = "Tests\\", src = "tests/" },
       }, result)
     end)
@@ -192,7 +192,7 @@ describe("composer", function()
       })
       local result = namespace.get_prefix_and_src()
       assert.are.same({
-        { prefix = "App\\",  src = "app/" },
+        { prefix = "App\\", src = "app/" },
         { prefix = "Core\\", src = "core/" },
       }, result)
     end)
@@ -227,7 +227,7 @@ describe("composer", function()
         "",
         "class TestClass",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()
@@ -242,7 +242,7 @@ describe("composer", function()
         "",
         "class TestClass",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()
@@ -261,7 +261,7 @@ describe("composer", function()
         "",
         "class TestClass",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()
@@ -276,7 +276,7 @@ describe("composer", function()
         "",
         "interface TestInterface",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()
@@ -291,7 +291,7 @@ describe("composer", function()
         "",
         "abstract class AbstractTest",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()
@@ -306,7 +306,7 @@ describe("composer", function()
         "",
         "trait TestTrait",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()
@@ -321,7 +321,7 @@ describe("composer", function()
         "",
         "enum TestEnum",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()
@@ -345,7 +345,7 @@ describe("composer", function()
         "",
         "final class FinalTest",
         "{",
-        "}"
+        "}",
       })
 
       local line, col = namespace.get_insertion_point()

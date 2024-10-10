@@ -1,5 +1,5 @@
 describe("get_filtered_classes", function()
-  local M      = require("tests.namespace.mainTest")
+  local M = require("tests.namespace.mainTest")
   local native = require("namespace.native")
 
   before_each(function()
