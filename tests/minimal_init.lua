@@ -20,3 +20,7 @@ ensure_install("nvim-treesitter/nvim-treesitter")
 
 vim.cmd("runtime plugin/plenary.vim")
 require("plenary.busted")
+
+dd = function(xxx)
+  print(vim.inspect(xxx))
+end

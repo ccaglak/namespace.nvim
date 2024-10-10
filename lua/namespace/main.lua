@@ -92,26 +92,26 @@ end
 -- Get filtered classes
 local function get_filtered_classes()
   -- get all classes and removes duplicates
-  local all_classes = table.remove_duplicates(get_classes_from_tree())
+  local all_classes = table.remove_duplicates(M.get_classes_from_tree())
 
-  local namespace_classes = get_namespaces()
+  local namespace_classes = M.get_namespaces()
 
   -- removes namespace classes from all classes
-  local filtered_classes = vim.tbl_filter(function(class)
+  local filtered_namespaced_classes = vim.tbl_filter(function(class)
     return not table.contains2(namespace_classes, class.name)
   end, all_classes)
 
   -- removes native classes from filtered classes
   local native_classes = vim.tbl_filter(function(class)
     return vim.tbl_contains(native, class.name)
-  end, filtered_classes)
+  end, filtered_namespaced_classes)
 
   --removes native classes from all classes
-  filtered_classes = vim.tbl_filter(function(class)
+  local usable_classes = vim.tbl_filter(function(class)
     return not table.contains2(native_classes, class.name)
-  end, filtered_classes)
+  end, filtered_namespaced_classes)
 
-  return filtered_classes, native_classes
+  return usable_classes, native_classes
 end
 
 local function has_composer_json()

@@ -1,7 +1,7 @@
 require("namespace.utils")
 local native = require("namespace.native")
 local Queue = require("namespace.queue")
-local NS = require("lua.namespace.composer")
+local NS = require("namespace.composer")
 
 local ts = vim.treesitter
 local api = vim.api
@@ -96,21 +96,21 @@ function M.get_filtered_classes()
   local namespace_classes = M.get_namespaces()
 
   -- removes namespace classes from all classes
-  local filtered_classes = vim.tbl_filter(function(class)
+  local filtered_namespaced_classes = vim.tbl_filter(function(class)
     return not table.contains2(namespace_classes, class.name)
   end, all_classes)
 
   -- removes native classes from filtered classes
   local native_classes = vim.tbl_filter(function(class)
     return vim.tbl_contains(native, class.name)
-  end, filtered_classes)
+  end, filtered_namespaced_classes)
 
   --removes native classes from all classes
-  filtered_classes = vim.tbl_filter(function(class)
+  local usable_classes = vim.tbl_filter(function(class)
     return not table.contains2(native_classes, class.name)
-  end, filtered_classes)
+  end, filtered_namespaced_classes)
 
-  return filtered_classes, native_classes
+  return usable_classes, native_classes
 end
 
 function M.has_composer_json()
