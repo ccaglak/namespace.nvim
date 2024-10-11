@@ -19,7 +19,7 @@ local function get_project_root()
   if cache.root ~= nil then
     return cache.root
   end
-  cache.root = vim.fs.root(0, { "composer.json", ".git", 'package.json', '.env' }) or vim.uv.cwd()
+  cache.root = vim.fs.root(0, { "composer.json", ".git", "package.json", ".env" }) or vim.uv.cwd()
   return cache.root
 end
 
@@ -72,7 +72,6 @@ local function get_classes_from_tree(bufnr)
   return declarations
 end
 
-local root = get_project_root()
 
 -- Get namespaces from the current buffer
 local function get_namespaces()
@@ -96,7 +95,7 @@ local function get_filtered_classes()
   -- get all classes and removes duplicates
   local all_classes = table.remove_duplicates(get_classes_from_tree())
 
-  local namespace_classes = M.get_namespaces()
+  local namespace_classes = get_namespaces()
 
   -- removes namespace classes from all classes
   local filtered_namespaced_classes = vim.tbl_filter(function(class)
@@ -117,7 +116,7 @@ local function get_filtered_classes()
 end
 
 local function has_composer_json()
-  local composer_json_path = root .. "/composer.json"
+  local composer_json_path = get_project_root() .. "/composer.json"
   return vim.fn.filereadable(composer_json_path) == 1
 end
 
@@ -194,7 +193,7 @@ end
 
 -- Search for classes in autoload_classmap.php
 local function search_autoload_classmap(classes)
-  local classmap_path = root .. string.format("%svendor%scomposer%sautoload_classmap.php", sep, sep, sep)
+  local classmap_path = get_project_root() .. string.format("%svendor%scomposer%sautoload_classmap.php", sep, sep, sep)
   local results = {}
 
   for _, class in pairs(classes) do
@@ -366,7 +365,7 @@ function M.getClass()
   local insertion_point = get_insertion_point()
   local prefix = com.get_prefix_and_src()
   local current_directory = get_current_file_directory()
-  local workspace_root = root
+  local workspace_root = get_project_root()
   local lines_to_insert = {}
 
   local class_queue = Queue.new()
@@ -394,7 +393,7 @@ function M.getClasses()
 
   local insertion_point = get_insertion_point()
   local prefix = com.get_prefix_and_src()
-  local workspace_root = root
+  local workspace_root = get_project_root()
   local lines_to_insert = {}
   local current_directory = get_current_file_directory()
 
