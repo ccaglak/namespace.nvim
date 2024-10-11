@@ -38,26 +38,23 @@ end
 function M.get_classes_from_tree(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   local language_tree = ts.get_parser(bufnr, "php")
-  if language_tree == nil then
-    return
-  end
   local syntax_tree = language_tree:parse()
   local root = syntax_tree[1]:root()
 
-  local query = M.get_cached_query(
+  local query = ts.query.parse(
     "php",
     [[
-        (attribute (name) @att)
-        (scoped_call_expression scope:(name) @sce)
-        (named_type (name) @named)
-        (base_clause (name) @extends )
-        (class_interface_clause (name) @implements)
-        (class_constant_access_expression (name) @static (name))
-        (simple_parameter type: (union_type (named_type (name) @name)))
-        (object_creation_expression (name) @objcreation)
-        (use_declaration (name) @use )
-        (binary_expression operator: "instanceof" right: [ (name) @type (qualified_name (name) @type) ])
-    ]]
+      (attribute (name) @att)
+      (scoped_call_expression scope:(name) @sce)
+      (named_type (name) @named)
+      (base_clause (name) @extends )
+      (class_interface_clause (name) @implements)
+      (class_constant_access_expression (name) @static (name))
+      (simple_parameter type: (union_type (named_type (name) @name)))
+      (object_creation_expression (name) @objcreation)
+      (use_declaration (name) @use )
+      (binary_expression operator: "instanceof" right: [ (name) @type (qualified_name (name) @type) ])
+      ]]
   )
 
   local declarations = {}
@@ -91,7 +88,8 @@ end
 -- Get filtered classes
 function M.get_filtered_classes()
   -- get all classes and removes duplicates
-  local all_classes = table.remove_duplicates(M.get_classes_from_tree())
+  local tree_classes = M.get_classes_from_tree()
+  local all_classes = table.remove_duplicates(tree_classes)
 
   local namespace_classes = M.get_namespaces()
 
@@ -222,12 +220,12 @@ function M.get_insertion_point()
     end
 
     if
-        line:find("^class")
-        or line:find("^final")
-        or line:find("^interface")
-        or line:find("^abstract")
-        or line:find("^trait")
-        or line:find("^enum")
+      line:find("^class")
+      or line:find("^final")
+      or line:find("^interface")
+      or line:find("^abstract")
+      or line:find("^trait")
+      or line:find("^enum")
     then
       break
     end
@@ -267,7 +265,7 @@ function M.process_file_search(class_entry, prefix, workspace_root, current_dire
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files

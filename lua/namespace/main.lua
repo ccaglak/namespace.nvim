@@ -221,12 +221,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -266,7 +266,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files
