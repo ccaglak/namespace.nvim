@@ -9,15 +9,18 @@ local M = {}
 
 local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
 
--- Cache for frequently accessed data
 local cache = {
-  root = {},
+  root = nil,
   file_search_results = {},
   treesitter_queries = {},
 }
 
 local function get_project_root()
-  return vim.fs.root(0, { "composer.json", ".git", "vendor" }) or vim.uv.cwd()
+  if cache.root ~= nil then
+    return cache.root
+  end
+  cache.root = vim.fs.root(0, { "composer.json", ".git", "vendor" }) or vim.uv.cwd()
+  return cache.root
 end
 
 local function get_current_file_directory()
@@ -26,7 +29,6 @@ local function get_current_file_directory()
   return current_file:gsub(get_project_root(), "")
 end
 
--- Performance optimization: Cache treesitter query
 local function get_cached_query(language, query_string)
   local key = language .. query_string
   if not cache.treesitter_queries[key] then
@@ -190,7 +192,7 @@ local function async_search_files(pattern, callback)
   end)
 end
 
--- Search for multiple classes in autoload_classmap.php
+-- Search for classes in autoload_classmap.php
 local function search_autoload_classmap(classes)
   local classmap_path = root .. string.format("%svendor%scomposer%sautoload_classmap.php", sep, sep, sep)
   local results = {}
@@ -221,12 +223,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -266,7 +268,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files
