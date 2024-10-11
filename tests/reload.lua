@@ -16,7 +16,6 @@ end
 ensure_install("nvim-lua/plenary.nvim")
 ensure_install("nvim-treesitter/nvim-treesitter")
 if not require("nvim-treesitter.parsers").has_parser("php") then
-  print("hello")
   require("nvim-treesitter.install").commands.TSInstallSync["run"]("php")
 end
 
