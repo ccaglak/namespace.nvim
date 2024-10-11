@@ -63,6 +63,7 @@ local function get_classes_from_tree(bufnr)
     ]]
   )
 
+  -- (namespace_use_clause [ (name) @type (qualified_name (name) @type) ])
   local declarations = {}
   for _, node, _ in query:iter_captures(root, bufnr, 0, -1) do
     local name = ts.get_node_text(node, bufnr)

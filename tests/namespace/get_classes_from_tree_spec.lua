@@ -29,7 +29,8 @@ describe("M.get_classes_from_tree()", function()
       use TestTrait;
       public function add(ParamClass $param){
         (new ScopedClass())->add();
-        StaticClass::add();
+        StaticClass::test();
+        EnumClass::test;
         $obj = new SomeClass();
         if ($result instanceof AnotherClass){}
         }
@@ -54,6 +55,7 @@ describe("M.get_classes_from_tree()", function()
       { name = "ScopedClass" },
       { name = "StaticClass" },
       { name = "Attribute" },
+      { name = "EnumClass" },
     }, result))
   end)
 
@@ -82,5 +84,62 @@ describe("M.get_classes_from_tree()", function()
 
     assert.is_table(result)
     assert.are.same({}, result)
+  end)
+  it("should handle multiple classes in a single file", function()
+    local mock_buf = 0
+    local mock_content = [[
+      <?php
+      class Class1 {}
+      class Class2 extends Class1 {}
+      class Class3 implements Interface1, Interface2 {}
+    ]]
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+    local result = main.get_classes_from_tree(mock_buf)
+    assert.True(eq({
+      { name = "Class1" },
+      { name = "Interface1" },
+      { name = "Interface2" },
+    }, result))
+  end)
+  it("should handle class names with namespaces", function()
+    local mock_buf = 0
+    local mock_content = [[
+      <?php
+      namespace App\Models;
+      use Illuminate\Database\Eloquent\Model;
+      class User extends Model {}
+    ]]
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+    local result = main.get_classes_from_tree(mock_buf)
+    assert.True(eq({
+      { name = "Model" },
+    }, result))
+  end)
+  it("should handle anonymous classes", function()
+    local mock_buf = 0
+    local mock_content = [[
+      <?php
+      $obj = new class extends BaseClass implements SomeInterface {};
+    ]]
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+    local result = main.get_classes_from_tree(mock_buf)
+    assert.True(eq({
+      { name = "BaseClass" },
+      { name = "SomeInterface" },
+    }, result))
+  end)
+  it("should handle nested classes should return empty", function()
+    local mock_buf = 0
+    local mock_content = [[
+      <?php
+      class OuterClass {
+        public function someMethod() {
+          class InnerClass {}
+        }
+      }
+    ]]
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+    local result = main.get_classes_from_tree(mock_buf)
+    assert.True(eq({}, result))
   end)
 end)
