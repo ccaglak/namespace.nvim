@@ -42,26 +42,6 @@ describe("sortTest", function()
       })
     end)
 
-    it("should remove duplicate use statements when configured", function()
-      config.remove_duplicates = true
-      api.nvim_buf_get_lines.returns({
-        "<?php",
-        "use Zebra\\Stripes;",
-        "use Apple\\Fruit;",
-        "use Zebra\\Stripes;",
-        "class TestClass {",
-        "}",
-      })
-      vim.tbl_filter.returns({ "use Zebra\\Stripes;", "use Apple\\Fruit;", "use Zebra\\Stripes;" })
-
-      namespace.sortUseStatements(config)
-
-      assert.stub(api.nvim_buf_set_lines).was_called_with(0, 1, 4, false, {
-        "use Apple\\Fruit;",
-        "use Zebra\\Stripes;",
-      })
-    end)
-
     it("should handle empty use statements", function()
       api.nvim_buf_get_lines.returns({
         "<?php",

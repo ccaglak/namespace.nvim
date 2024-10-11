@@ -14,6 +14,11 @@ local subcommand_tbl = {
       require("namespace").namespace()
     end,
   },
+  sort = {
+    impl = function()
+      require("namespace").sort()
+    end,
+  },
 }
 
 local function my_cmd(opts)

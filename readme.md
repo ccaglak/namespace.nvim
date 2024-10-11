@@ -20,7 +20,7 @@ Neovim Php Namespace Resolver
 {  -- lazy
     'ccaglak/namespace.nvim',
     keys = {
-        { "<leader>la", "<cmd>Php classes<cr>"},
+        { "<leader>ls", "<cmd>Php classes<cr>"},
         { "<leader>lc", "<cmd>Php class<cr>"},
         { "<leader>ln", "<cmd>Php namespace<cr>"},
     },
@@ -29,6 +29,20 @@ Neovim Php Namespace Resolver
         "ccaglak/phptools.nvim", -- optional
         "ccaglak/larago.nvim", -- optional
     }
+    config = function()
+    require('namespace').setup({
+      ui = false, -- default: false
+      cacheOnload = false, -- default: false
+      dumpOnload = false, -- default: false
+      sort = {
+        enable = false, -- default: false
+        on_save = false, -- default: false
+        sort_type = 'length_desc', -- default: natural
+        --  ascending -- descending -- length_asc
+        -- length_desc -- natural -- case_insensitive
+      }
+    })
+    end
 }
 
 ## Keymaps -- No default keymaps

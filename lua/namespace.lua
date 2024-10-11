@@ -4,6 +4,11 @@ local config = {
   ui = false,
   cacheOnload = false,
   dumpOnload = false,
+  sort = {
+    enabled = false,
+    on_save = false,
+    sort_type = "natural",
+  },
 }
 
 ---@class Namespace
@@ -35,7 +40,16 @@ M.class = function()
 end
 
 M.namespace = function()
-  require("lua.namespace.composer").resolve()
+  require("namespace.composer").resolve()
+end
+
+M.sort = function()
+  dd(M.config.sort)
+  if M.config.sort.enabled then
+    require("namespace.sort").sortUseStatements(M.config.sort)
+  else
+    vim.notify("Sort is disabled ", vim.log.levels.WARN, { title = "PhpNamespace" })
+  end
 end
 
 return M

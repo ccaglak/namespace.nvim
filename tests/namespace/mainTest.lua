@@ -2,6 +2,7 @@ require("namespace.utils")
 local native = require("namespace.native")
 local Queue = require("namespace.queue")
 local NS = require("namespace.composer")
+local sort = require("namespace.sort")
 
 local ts = vim.treesitter
 local api = vim.api
@@ -377,6 +378,10 @@ function M.getClass()
   M.process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
+    local srt = require("namespace").config.sort
+    if srt.on_save then
+      sort.sortUseStatements(srt)
+    end
   end)
 end
 
@@ -414,6 +419,10 @@ function M.getClasses()
   M.process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
+    local srt = require("namespace").config.sort
+    if srt.on_save then
+      sort.sortUseStatements(srt)
+    end
   end)
 end
 
