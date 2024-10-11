@@ -26,7 +26,7 @@ function M.get_current_file_directory()
 end
 
 -- Performance optimization: Cache treesitter query
-function M.get_cached_query(language, query_string)
+local function get_cached_query(language, query_string)
   local key = language .. query_string
   if not cache.treesitter_queries[key] then
     cache.treesitter_queries[key] = vim.treesitter.query.parse(language, query_string)
@@ -38,23 +38,26 @@ end
 function M.get_classes_from_tree(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   local language_tree = ts.get_parser(bufnr, "php")
+  if language_tree == nil then
+    return
+  end
   local syntax_tree = language_tree:parse()
   local root = syntax_tree[1]:root()
 
-  local query = ts.query.parse(
+  local query = get_cached_query(
     "php",
     [[
-      (attribute (name) @att)
-      (scoped_call_expression scope:(name) @sce)
-      (named_type (name) @named)
-      (base_clause (name) @extends )
-      (class_interface_clause (name) @implements)
-      (class_constant_access_expression (name) @static (name))
-      (simple_parameter type: (union_type (named_type (name) @name)))
-      (object_creation_expression (name) @objcreation)
-      (use_declaration (name) @use )
-      (binary_expression operator: "instanceof" right: [ (name) @type (qualified_name (name) @type) ])
-      ]]
+        (attribute (name) @att)
+        (scoped_call_expression scope:(name) @sce)
+        (named_type (name) @named)
+        (base_clause (name) @extends )
+        (class_interface_clause (name) @implements)
+        (class_constant_access_expression (name) @static (name))
+        (simple_parameter type: (union_type (named_type (name) @name)))
+        (object_creation_expression (name) @objcreation)
+        (use_declaration (name) @use )
+        (binary_expression operator: "instanceof" right: [ (name) @type (qualified_name (name) @type) ])
+    ]]
   )
 
   local declarations = {}
