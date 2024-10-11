@@ -2,7 +2,6 @@ local namespace = require("namespace.composer")
 local mock = require("luassert.mock")
 local stub = require("luassert.stub")
 
-
 describe("composer", function()
   describe("resolve_namespace", function()
     local original_expand
@@ -177,7 +176,7 @@ describe("composer", function()
       })
       local result = namespace.get_prefix_and_src()
       assert.are.same({
-        { prefix = "App\\",   src = "app/" },
+        { prefix = "App\\", src = "app/" },
         { prefix = "Tests\\", src = "tests/" },
       }, result)
     end)
