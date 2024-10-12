@@ -3,8 +3,12 @@ local native = require("namespace.native")
 local Queue = require("namespace.queue")
 local com = require("namespace.composer")
 local sort = require("namespace.sort")
-local sort_config = require("namespace").config.sort
+local config = require("namespace").config
 local vui = require("namespace.ui").select
+
+if config.ui == false then
+  vui = vim.ui.select
+end
 
 local ts = vim.treesitter
 local api = vim.api
@@ -387,7 +391,7 @@ function M.getClass()
   process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
-    sort.sortUseStatements(sort_config)
+    sort.sortUseStatements(config.sort)
   end)
 end
 
@@ -423,7 +427,7 @@ function M.getClasses()
   process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
-    sort.sortUseStatements(sort_config)
+    sort.sortUseStatements(config.sort)
   end)
 end
 

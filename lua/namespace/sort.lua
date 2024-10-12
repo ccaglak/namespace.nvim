@@ -82,7 +82,6 @@ local sort_functions = {
 
 function M.sortUseStatements(sort)
   if not sort.on_save then
-    vim.notify("sort.on_save disabled", vim.log.levels.WARN, { title = "PhpNamespace" })
     return
   end
   local lines = vim.api.nvim_buf_get_lines(0, 0, 50, false)
