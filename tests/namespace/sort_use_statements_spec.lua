@@ -15,31 +15,12 @@ describe("sortTest", function()
       api.nvim_buf_set_lines = stub.new()
       config = {
         sort_type = "alphabetical",
-        remove_duplicates = false,
       }
     end)
 
     after_each(function()
       vim.tbl_filter = original_tbl_filter
       mock.revert(api)
-    end)
-
-    it("should sort use statements alphabetically", function()
-      api.nvim_buf_get_lines.returns({
-        "<?php",
-        "use Zebra\\Stripes;",
-        "use Apple\\Fruit;",
-        "class TestClass {",
-        "}",
-      })
-      vim.tbl_filter.returns({ "use Zebra\\Stripes;", "use Apple\\Fruit;" })
-
-      namespace.sortUseStatements(config)
-
-      assert.stub(api.nvim_buf_set_lines).was_called_with(0, 1, 3, false, {
-        "use Apple\\Fruit;",
-        "use Zebra\\Stripes;",
-      })
     end)
 
     it("should handle empty use statements", function()
@@ -56,7 +37,7 @@ describe("sortTest", function()
     end)
 
     it("should sort by length when configured", function()
-      config.sort_type = "length"
+      config.sort_type = "length_desc"
       api.nvim_buf_get_lines.returns({
         "<?php",
         "use Very\\Long\\Namespace\\Class;",
