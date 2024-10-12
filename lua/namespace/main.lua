@@ -3,7 +3,7 @@ local native = require("namespace.native")
 local Queue = require("namespace.queue")
 local com = require("namespace.composer")
 local sort = require("namespace.sort")
-
+local sort_config = require("namespace").config.sort
 local vui = require("namespace.ui").select
 
 local ts = vim.treesitter
@@ -16,6 +16,7 @@ local cache = {
   root = nil,
   file_search_results = {},
   treesitter_queries = {},
+  composer_prefix_src = nil,
 }
 
 local function get_project_root()
@@ -39,10 +40,6 @@ local function get_cached_query(language, query_string)
   end
   return cache.treesitter_queries[key]
 end
-
-
-
-
 
 -- Get classes from the current buffer using treesitter
 local function get_classes_from_tree(bufnr)
@@ -334,6 +331,13 @@ local function process_class_queue(queue, prefix, workspace_root, current_direct
   process_next()
 end
 
+local function get_prefix_and_src()
+  if not cache.composer_prefix_src then
+    cache.composer_prefix_src = com.get_prefix_and_src()
+  end
+  return cache.composer_prefix_src
+end
+
 function M.getClass()
   if not has_composer_json() then
     vim.notify("composer.json not found ", vim.log.levels.WARN, { title = "PhpNamespace" })
@@ -370,7 +374,7 @@ function M.getClass()
   end
 
   local insertion_point = get_insertion_point()
-  local prefix = com.get_prefix_and_src()
+  local prefix = get_prefix_and_src()
   local current_directory = get_current_file_directory()
   local workspace_root = get_project_root()
   local lines_to_insert = {}
@@ -383,10 +387,7 @@ function M.getClass()
   process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
-    local srt = require("namespace").config.sort
-    if srt.on_save then
-      sort.sortUseStatements(srt)
-    end
+    sort.sortUseStatements(sort_config)
   end)
 end
 
@@ -403,7 +404,7 @@ function M.getClasses()
   end
 
   local insertion_point = get_insertion_point()
-  local prefix = com.get_prefix_and_src()
+  local prefix = get_prefix_and_src()
   local workspace_root = get_project_root()
   local lines_to_insert = {}
   local current_directory = get_current_file_directory()
@@ -422,10 +423,7 @@ function M.getClasses()
   process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
-    local srt = require("namespace").config.sort
-    if srt.on_save then
-      sort.sortUseStatements(srt)
-    end
+    sort.sortUseStatements(sort_config)
   end)
 end
 

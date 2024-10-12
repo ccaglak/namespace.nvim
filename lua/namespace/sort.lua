@@ -80,13 +80,17 @@ local sort_functions = {
   case_insensitive = sort_lines_case_insensitive,
 }
 
-function M.sortUseStatements(config)
+function M.sortUseStatements(sort)
+  if not sort.on_save then
+    vim.notify("sort.on_save disabled", vim.log.levels.WARN, { title = "PhpNamespace" })
+    return
+  end
   local lines = vim.api.nvim_buf_get_lines(0, 0, 50, false)
   local use_statements = vim.tbl_filter(function(line)
     return line:match("^use ")
   end, lines)
 
-  local sort_function = sort_functions[config.sort_type] or sort_lines
+  local sort_function = sort_functions[sort.sort_type]
   use_statements = sort_function(use_statements)
 
   local start_line, end_line
