@@ -4,6 +4,8 @@ local Queue = require("namespace.queue")
 local com = require("namespace.composer")
 local sort = require("namespace.sort")
 
+local vui = require("namespace.ui").select
+
 local ts = vim.treesitter
 local api = vim.api
 local M = {}
@@ -37,6 +39,10 @@ local function get_cached_query(language, query_string)
   end
   return cache.treesitter_queries[key]
 end
+
+
+
+
 
 -- Get classes from the current buffer using treesitter
 local function get_classes_from_tree(bufnr)
@@ -223,12 +229,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -239,7 +245,7 @@ end
 
 local function process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
   if #paths > 1 then
-    vim.ui.select(paths, {
+    vui(paths, {
       prompt = "Select the appropriate path for " .. class_name,
       format_item = function(item)
         return item.fqcn
@@ -268,7 +274,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files
@@ -281,7 +287,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if #matching_files == 1 then
       callback(matching_files[1])
     elseif #matching_files > 1 then
-      vim.ui.select(matching_files, {
+      vui(matching_files, {
         prompt = "Select the appropriate file for " .. class_entry.name,
         format_item = function(item)
           return item

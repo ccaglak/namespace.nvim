@@ -1,72 +1,62 @@
 local api = vim.api
 local lsp_util = vim.lsp.util
 
-local ui = {}
+local UI = {}
 
-local function esc(cmd)
-  return api.nvim_replace_termcodes(cmd, true, false, true)
-end
-
-local function get_win_width(value_length, opts)
-  return math.max(value_length + 10, (opts.prompt and opts.prompt:len() + 10 or 0))
-end
-
-vim.ui.select = function(items, opts, on_choice)
-  opts = opts or {}
-  local choices = {}
-  local format_item = opts.format_item or tostring
-  local longest_item = 0
-  for i, item in ipairs(items) do
-    local choice = table.concat({ tostring(i), ". ", format_item(item), " " })
-    table.insert(choices, choice)
-    longest_item = math.max(longest_item, #choice)
+function UI.select(items, opts, on_choice)
+  if #items == 0 then
+    vim.notify("No items to select from", vim.log.levels.WARN)
+    on_choice(nil)
+    return
   end
 
-  local bufnr, winnr = lsp_util.open_floating_preview(choices, "", {
-    border = "rounded",
-    title = opts.prompt,
-    title_pos = "center",
-  })
+  local choices = vim.tbl_map(opts.format_item, items)
+  local longest_item = math.max(unpack(vim.tbl_map(function(choice) return #choice end, choices)))
 
-  api.nvim_win_set_config(winnr, {
-    width = get_win_width(longest_item, opts),
-  })
+  local selected_items = {}
 
-  api.nvim_set_current_win(winnr)
-  vim.keymap.set("n", "<CR>", function()
-    local item = items[vim.fn.line(".")]
-    api.nvim_win_close(0, true)
-    if item then
-      on_choice(item, vim.fn.line("."))
-    else
-      on_choice(nil, nil)
-    end
-  end, { buffer = bufnr })
+  vim.schedule(function()
+    local bufnr, winnr = lsp_util.open_floating_preview(choices, "", {
+      border = "rounded",
+      title = opts.prompt,
+      title_pos = "center",
+    })
+
+    api.nvim_win_set_config(winnr, {
+      width = longest_item + 4,
+    })
+
+    api.nvim_set_current_win(winnr)
+
+    vim.keymap.set("n", "<Space>", function()
+      local index = vim.fn.line(".")
+      if selected_items[index] then
+        selected_items[index] = nil
+      else
+        selected_items[index] = items[index]
+      end
+      -- Highlight selected items
+      vim.api.nvim_buf_clear_namespace(bufnr, -1, 0, -1)
+      for i, _ in pairs(selected_items) do
+        vim.api.nvim_buf_add_highlight(bufnr, -1, "Visual", i - 1, 0, -1)
+      end
+    end, { buffer = bufnr })
+
+    vim.keymap.set("n", "<CR>", function()
+      api.nvim_win_close(winnr, true)
+      if next(selected_items) then
+        on_choice(vim.tbl_values(selected_items))
+      else
+        local selected_index = vim.fn.line(".")
+        on_choice(items[selected_index])
+      end
+    end, { buffer = bufnr })
+
+    vim.keymap.set("n", "q", function()
+      api.nvim_win_close(winnr, true)
+      on_choice(nil)
+    end, { buffer = bufnr })
+  end)
 end
 
-vim.ui.input = function(opts, on_confirm)
-  opts = opts or {}
-  local current_val = opts.default or ""
-  local win_width = get_win_width(#current_val, opts)
-  local bufnr, winnr = lsp_util.open_floating_preview({ current_val }, "", {
-    height = 1,
-    border = "rounded",
-    width = win_width,
-    wrap = false,
-    title = opts.prompt,
-    title_pos = "center",
-  })
-
-  api.nvim_win_set_config(winnr, { width = win_width })
-  api.nvim_set_current_win(winnr)
-  api.nvim_buf_set_option(bufnr, "modifiable", true)
-  vim.keymap.set("i", "<CR>", function()
-    local input = vim.trim(vim.fn.getline("."))
-    api.nvim_win_close(0, true)
-    api.nvim_feedkeys(esc("<Esc>"), "i", true)
-    on_confirm(#input > 0 and input or nil)
-  end, { buffer = bufnr })
-  vim.cmd.startinsert({ bang = true })
-end
-
-return ui
+return UI

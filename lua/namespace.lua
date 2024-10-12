@@ -44,7 +44,6 @@ M.namespace = function()
 end
 
 M.sort = function()
-  dd(M.config.sort)
   if M.config.sort.enabled then
     require("namespace.sort").sortUseStatements(M.config.sort)
   else
