@@ -11,6 +11,7 @@ if config.ui == false then
 end
 
 local ts = vim.treesitter
+
 local api = vim.api
 local M = {}
 
