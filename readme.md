@@ -25,7 +25,7 @@ Neovim Php Namespace Resolver
         { "<leader>ln", "<cmd>Php namespace<cr>"},
     },
     dependencies = {
-        "nvim-lua/plenary.nvim",
+        "nvim-lua/plenary.nvim", -- optional
         "ccaglak/phptools.nvim", -- optional
         "ccaglak/larago.nvim", -- optional
     }
@@ -51,6 +51,7 @@ Neovim Php Namespace Resolver
     vim.keymap.set("n", "<leader>la", "<cmd>Php classes<cr>")
     vim.keymap.set("n", "<leader>lc", "<cmd>Php class<cr>")
     vim.keymap.set("n", "<leader>ln", "<cmd>Php namespace<cr>")
+    vim.keymap.set("n", "<leader>ls", "<cmd>Php sort<cr>")
 ```
 
 ## Requires
