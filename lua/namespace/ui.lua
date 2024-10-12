@@ -19,7 +19,7 @@ function UI.select(items, opts, on_choice)
   })
 
   api.nvim_win_set_config(winnr, {
-    width = longest_item + 4,
+    width = longest_item + 10,
   })
 
   api.nvim_set_current_win(winnr)

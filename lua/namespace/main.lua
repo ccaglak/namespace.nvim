@@ -231,12 +231,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -276,7 +276,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files
@@ -350,10 +350,10 @@ function M.getClass()
   end
 
   local word_under_cursor = vim.fn.expand("<cword>")
-  if word_under_cursor == "" then
-    vim.notify("No word under cursor", vim.log.levels.WARN, { title = "PhpNamespace" })
-    return
-  end
+  -- if word_under_cursor == "" then
+  --   vim.notify("No word under cursor", vim.log.levels.WARN, { title = "PhpNamespace" })
+  --   return
+  -- end
 
   local existing_namespaces = get_namespaces()
   for _, ns in ipairs(existing_namespaces) do
@@ -392,7 +392,9 @@ function M.getClass()
   process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
-    sort.sortUseStatements(config.sort)
+    if config.sort.on_save then
+      sort.sortUseStatements(config.sort)
+    end
   end)
 end
 
@@ -428,7 +430,10 @@ function M.getClasses()
   process_class_queue(class_queue, prefix, workspace_root, current_directory, function(use_statements)
     vim.list_extend(lines_to_insert, use_statements)
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, lines_to_insert)
-    sort.sortUseStatements(config.sort)
+
+    if config.sort.on_save then
+      sort.sortUseStatements(config.sort)
+    end
   end)
 end
 
