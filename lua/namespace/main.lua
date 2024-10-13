@@ -5,6 +5,7 @@ local com = require("namespace.composer")
 local sort = require("namespace.sort")
 local config = require("namespace").config
 local vui = require("namespace.ui").select
+local notify = require("namespace.notify").notify
 
 if config.ui == false then
   vui = vim.ui.select
@@ -231,12 +232,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -276,7 +277,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files
@@ -296,7 +297,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
         end,
       }, callback)
     else
-      vim.notify("No matches found for " .. class_entry.name, vim.log.levels.WARN, { title = "PhpNamespace" })
+      notify("No matches found for " .. class_entry.name)
       callback(nil)
     end
   end)
@@ -345,20 +346,20 @@ end
 
 function M.getClass()
   if not has_composer_json() then
-    vim.notify("composer.json not found ", vim.log.levels.WARN, { title = "PhpNamespace" })
+    notify("composer.json not found ")
     return
   end
 
   local word_under_cursor = vim.fn.expand("<cword>")
   if word_under_cursor == "" then
-    vim.notify("No word under cursor", vim.log.levels.WARN, { title = "PhpNamespace" })
+    notify("No word under cursor")
     return
   end
 
   local existing_namespaces = get_namespaces()
   for _, ns in ipairs(existing_namespaces) do
     if ns.name == word_under_cursor then
-      vim.notify("Class '" .. word_under_cursor .. "' is already used", vim.log.levels.INFO, { title = "PhpNamespace" })
+      notify("Class '" .. word_under_cursor .. "' is already used")
       return
     end
   end
@@ -367,14 +368,14 @@ function M.getClass()
     local insertion_point = get_insertion_point()
     local use_statement = "use " .. word_under_cursor .. ";"
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, { use_statement })
-    vim.notify("Added native class: " .. word_under_cursor, vim.log.levels.INFO, { title = "PhpNamespace" })
+    notify("Added native class: " .. word_under_cursor)
     return
   end
 
   local filtered_classes = { { name = word_under_cursor } }
 
   if not filtered_classes then
-    vim.notify("No class found under cursor", vim.log.levels.WARN, { title = "PhpNamespace" })
+    notify("No class found under cursor")
     return
   end
 
@@ -400,13 +401,13 @@ end
 
 function M.getClasses()
   if not has_composer_json() then
-    vim.notify("composer.json not found ", vim.log.levels.WARN, { title = "PhpNamespace" })
+    notify("composer.json not found ")
     return
   end
 
   local filtered_classes, native_classes = get_filtered_classes()
   if not filtered_classes then
-    vim.notify("No classes found to process", vim.log.levels.WARN, { title = "PhpNamespace" })
+    notify("No classes found to process")
     return
   end
 
