@@ -200,11 +200,6 @@ local function async_search_files(pattern, callback)
   end)
 end
 
--- public to to be used in autoload.lua
-function M.search(pattern, callback)
-  async_search_files(pattern, callback)
-end
-
 -- Search for classes in autoload_classmap.php
 local function search_autoload_classmap(classes)
   local classmap_path = get_project_root() .. string.format("%svendor%scomposer%sautoload_classmap.php", sep, sep, sep)
@@ -355,10 +350,10 @@ function M.getClass()
   end
 
   local word_under_cursor = vim.fn.expand("<cword>")
-  -- if word_under_cursor == "" then
-  --   vim.notify("No word under cursor", vim.log.levels.WARN, { title = "PhpNamespace" })
-  --   return
-  -- end
+  if word_under_cursor == "" then
+    vim.notify("No word under cursor", vim.log.levels.WARN, { title = "PhpNamespace" })
+    return
+  end
 
   local existing_namespaces = get_namespaces()
   for _, ns in ipairs(existing_namespaces) do

@@ -81,10 +81,6 @@ local sort_functions = {
 }
 
 function M.sortUseStatements(sort)
-  if sort.enabled == false then
-    vim.notify("Sort is disabled ", vim.log.levels.WARN, { title = "PhpNamespace" })
-    return
-  end
   local lines = vim.api.nvim_buf_get_lines(0, 0, 50, false)
   local use_statements = vim.tbl_filter(function(line)
     return line:match("^use ")

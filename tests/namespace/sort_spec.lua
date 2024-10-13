@@ -19,13 +19,6 @@ describe("sort", function()
       vim.api.nvim_buf_set_lines = original_nvim_buf_set_lines
     end)
 
-    it("should not sort when on_save is false", function()
-      local sort = { on_save = false }
-      namespace.sortUseStatements(sort)
-      assert.stub(vim.api.nvim_buf_get_lines).was_not_called()
-      assert.stub(vim.api.nvim_buf_set_lines).was_not_called()
-    end)
-
     it("should sort use statements when on_save is true", function()
       local sort = { on_save = true, sort_type = "natural" }
       vim.api.nvim_buf_get_lines.returns({
@@ -107,6 +100,59 @@ describe("sort", function()
         "use Namespace\\ClassA as AliasA;",
         "use Namespace\\ClassB;",
         "use Namespace\\ClassC as AliasC;",
+      })
+    end)
+  end)
+end)
+describe("sort", function()
+  describe("sortUseStatements", function()
+    local original_nvim_buf_get_lines
+    local original_nvim_buf_set_lines
+    local original_vim_notify
+
+    before_each(function()
+      original_nvim_buf_get_lines = vim.api.nvim_buf_get_lines
+      original_nvim_buf_set_lines = vim.api.nvim_buf_set_lines
+      original_vim_notify = vim.notify
+      vim.api.nvim_buf_get_lines = stub.new(vim.api, "nvim_buf_get_lines")
+      vim.api.nvim_buf_set_lines = stub.new(vim.api, "nvim_buf_set_lines")
+      vim.notify = stub.new(vim, "notify")
+    end)
+
+    after_each(function()
+      vim.api.nvim_buf_get_lines = original_nvim_buf_get_lines
+      vim.api.nvim_buf_set_lines = original_nvim_buf_set_lines
+      vim.notify = original_vim_notify
+    end)
+
+    it("should not sort and notify when enabled is false", function()
+      local sort = { enabled = false }
+      namespace.sortUseStatements(sort)
+      assert.stub(vim.notify).was_called_with("Sort is disabled ", vim.log.levels.WARN, { title = "PhpNamespace" })
+      assert.stub(vim.api.nvim_buf_get_lines).was_not_called()
+      assert.stub(vim.api.nvim_buf_set_lines).was_not_called()
+    end)
+
+    it("should handle mixed use statements with classes, functions, and constants", function()
+      local sort = { enabled = true, sort_type = "natural" }
+      vim.api.nvim_buf_get_lines.returns({
+        "<?php",
+        "",
+        "use const Namespace\\CONST_C;",
+        "use function Namespace\\functionB;",
+        "use Namespace\\ClassA;",
+        "",
+        "class TestClass {",
+        "}",
+      })
+
+      namespace.sortUseStatements(sort)
+
+      assert.stub(vim.api.nvim_buf_get_lines).was_called_with(0, 0, 50, false)
+      assert.stub(vim.api.nvim_buf_set_lines).was_called_with(0, 2, 5, false, {
+        "use Namespace\\ClassA;",
+        "use const Namespace\\CONST_C;",
+        "use function Namespace\\functionB;",
       })
     end)
   end)
