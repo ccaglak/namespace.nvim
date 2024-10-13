@@ -364,8 +364,13 @@ function M.getClass()
     end
   end
 
+  local insertion_point = get_insertion_point()
+  local prefix = get_prefix_and_src()
+  local current_directory = get_current_file_directory()
+  local workspace_root = get_project_root()
+  local lines_to_insert = {}
+
   if vim.tbl_contains(native, word_under_cursor) then
-    local insertion_point = get_insertion_point()
     local use_statement = "use " .. word_under_cursor .. ";"
     api.nvim_buf_set_lines(0, insertion_point, insertion_point, false, { use_statement })
     notify("Added native class: " .. word_under_cursor)
@@ -374,16 +379,10 @@ function M.getClass()
 
   local filtered_classes = { { name = word_under_cursor } }
 
-  if not filtered_classes then
+  if #filtered_classes == 0 then
     notify("No class found under cursor")
     return
   end
-
-  local insertion_point = get_insertion_point()
-  local prefix = get_prefix_and_src()
-  local current_directory = get_current_file_directory()
-  local workspace_root = get_project_root()
-  local lines_to_insert = {}
 
   local class_queue = Queue.new()
   for _, class_entry in ipairs(filtered_classes) do
