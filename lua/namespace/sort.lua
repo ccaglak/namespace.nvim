@@ -1,35 +1,35 @@
 local M = {}
-
 local function sort_lines(lines)
-  return vim.iter(lines):sort():totable()
+  table.sort(lines)
+  return lines
 end
 
 local function sort_lines_case_insensitive(lines)
-  return vim.iter(lines):sort(function(a, b)
+  table.sort(lines, function(a, b)
     return string.lower(a) < string.lower(b)
-  end):totable()
+  end)
+  return lines
 end
 
 local function sort_lines_reverse(lines)
-  return vim.iter(lines):sort(function(a, b)
+  table.sort(lines, function(a, b)
     return a > b
-  end):totable()
+  end)
+  return lines
 end
 
 local function sort_lines_line_length(lines)
-  local with_length = vim.tbl_map(function(line)
-    return { len = #line, text = line }
-  end, lines)
-  table.sort(with_length, function(a, b) return a.len < b.len end)
-  return vim.tbl_map(function(item) return item.text end, with_length)
+  table.sort(lines, function(a, b)
+    return #a < #b
+  end)
+  return lines
 end
 
 local function sort_lines_line_length_reverse(lines)
-  local with_length = vim.tbl_map(function(line)
-    return { len = #line, text = line }
-  end, lines)
-  table.sort(with_length, function(a, b) return a.len > b.len end)
-  return vim.tbl_map(function(item) return item.text end, with_length)
+  table.sort(lines, function(a, b)
+    return #a > #b
+  end)
+  return lines
 end
 
 local function sort_lines_natural(lines)
@@ -66,8 +66,10 @@ local function sort_lines_natural(lines)
     return #a < #b
   end
 
-  return vim.iter(lines):sort(natural_compare):totable()
+  table.sort(lines, natural_compare)
+  return lines
 end
+
 
 local sort_functions = {
   ascending = sort_lines,

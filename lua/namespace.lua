@@ -44,11 +44,7 @@ M.namespace = function()
 end
 
 M.sort = function()
-  if M.config.sort.enabled then
-    require("namespace.sort").sortUseStatements(M.config.sort)
-  else
-    vim.notify("Sort is disabled ", vim.log.levels.WARN, { title = "PhpNamespace" })
-  end
+  require("namespace.sort").sortUseStatements(M.config.sort)
 end
 
 return M
