@@ -1,5 +1,5 @@
 local M = {}
-local main = require("namespace.main")
+local notify = require("namespace.notify").notify
 local ns = require("namespace.composer")
 
 local function has_composer_json()
@@ -10,19 +10,15 @@ end
 
 M.run_composer_dump_autoload = function()
   if not has_composer_json() then
-    vim.notify("'composer.json' not found ", vim.log.levels.INFO, { title = "PhpNamespace" })
+    notify("'composer.json' not found ")
   end
 
   local function on_exit(job_id, exit_code, event_type)
     if exit_code == 0 then
-      vim.notify("Composer dump-autoload completed successfully", vim.log.levels.INFO, { title = "PhpNamespace" })
+      notify("Composer dump-autoload completed successfully")
     else
       local output = vim.fn.join(vim.fn.jobread(job_id), "\n")
-      vim.notify(
-        string.format("Composer dump-autoload failed with exit code: %d\nOutput: %s", exit_code, output),
-        vim.log.levels.ERROR,
-        { title = "PhpNamespace" }
-      )
+      notify("Composer dump-autoload failed")
     end
   end
 

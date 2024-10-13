@@ -1,5 +1,6 @@
 local N = {}
 
+local notify = require("namespace.notify").notify
 local api = vim.api
 
 local cache = {
@@ -7,7 +8,7 @@ local cache = {
 }
 
 local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
-local root = vim.fs.root(0, { "composer.json", ".git", "vendor" })
+local root = vim.fs.root(0, { "composer.json", ".git" })
 
 -- split to remove
 local function parse(str)
@@ -107,7 +108,7 @@ function N.resolve()
     if not ok then
       api.nvim_buf_set_lines(0, insertion, insertion, false, { ns })
     else
-      vim.notify("Namespace already exists", "", "warn")
+      notify("Namespace already exists")
     end
   end
 end
