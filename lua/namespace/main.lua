@@ -1,3 +1,6 @@
+local ts = vim.treesitter
+local api = vim.api
+
 require("namespace.utils")
 local native = require("namespace.native")
 local Queue = require("namespace.queue")
@@ -10,11 +13,6 @@ local notify = require("namespace.notify").notify
 if config.ui == false then
   vui = vim.ui.select
 end
-
-local ts = vim.treesitter
-
-local api = vim.api
-local M = {}
 
 local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
 
@@ -125,11 +123,6 @@ local function get_filtered_classes()
   return usable_classes, native_classes
 end
 
-local function has_composer_json()
-  local composer_json_path = get_project_root() .. "/composer.json"
-  return vim.fn.filereadable(composer_json_path) == 1
-end
-
 -- Transform file path to use statement ---
 local function transform_path(path, prefix_table, workspace_root, composer)
   if not path then
@@ -223,7 +216,7 @@ local function search_autoload_classmap(classes)
 end
 
 local function get_insertion_point()
-  local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local content = vim.api.nvim_buf_get_lines(0, 0, 50, false)
   local insertion_point = nil
 
   for i, line in ipairs(content) do
@@ -249,7 +242,7 @@ end
 local function process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
   if #paths > 1 then
     vui(paths, {
-      prompt = "Select the appropriate path for " .. class_name,
+      prompt = "Select the appropriate " .. class_name,
       format_item = function(item)
         return item.fqcn
       end,
@@ -291,7 +284,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
       callback(matching_files[1])
     elseif #matching_files > 1 then
       vui(matching_files, {
-        prompt = "Select the appropriate file for " .. class_entry.name,
+        prompt = "Select the appropriate " .. class_entry.name,
         format_item = function(item)
           return item
         end,
@@ -343,6 +336,13 @@ local function get_prefix_and_src()
   end
   return cache.composer_prefix_src
 end
+
+local function has_composer_json()
+  local composer_json_path = get_project_root() .. "/composer.json"
+  return vim.fn.filereadable(composer_json_path) == 1
+end
+
+local M = {}
 
 function M.getClass()
   if not has_composer_json() then
