@@ -12,6 +12,7 @@ M.run_composer_dump_autoload = function()
   if not has_composer_json() then
     vim.notify("'composer.json' not found ", vim.log.levels.INFO, { title = "PhpNamespace" })
   end
+
   local function on_exit(job_id, exit_code, event_type)
     if exit_code == 0 then
       vim.notify("Composer dump-autoload completed successfully", vim.log.levels.INFO, { title = "PhpNamespace" })
@@ -24,6 +25,7 @@ M.run_composer_dump_autoload = function()
       )
     end
   end
+
   local project_root = vim.fs.root(0, { "composer.json", ".git", "vendor" })
   vim.fn.chdir(project_root)
 
@@ -39,11 +41,12 @@ M.setup_lsp_autoload = function()
     callback = function(args)
       local client = vim.lsp.get_client_by_id(args.data.client_id)
       if client and client.name == "intelephense" or client.name == "phpactor" then
-        local project_root = vim.fs.root(0, { "composer.json", ".git", "vendor" })
+        local project_root = vim.fs.root(0, { "git", "composer.json" })
         vim.fn.chdir(project_root)
-        main.run_composer_dump_autoload()
+        M.run_composer_dump_autoload()
       end
     end,
+    once = true,
   })
 end
 
@@ -53,9 +56,10 @@ M.setup_cache = function()
       local client = vim.lsp.get_client_by_id(args.data.client_id)
       if client and client.name == "intelephense" or client.name == "phpactor" then
         ns.read_composer_file()
-        main.search("*.php", function() end)
+        -- main.search("*.php", function() end)
       end
     end,
+    once = true,
   })
 end
 
