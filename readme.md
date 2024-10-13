@@ -11,6 +11,8 @@ Neovim Php Namespace Resolver
 - `:Php classes`: Find all classes, traits, implementations, and attributes from Composer or local search.
 - `:Php class`: Get the class under the cursor.
 - `:Php namespace`: Generate namespace for the current file.
+- `:Php sort`: Sorts namespaces in current file with 6 options.
+
 
 
 ## Install
@@ -23,9 +25,9 @@ Neovim Php Namespace Resolver
         { "<leader>ls", "<cmd>Php classes<cr>"},
         { "<leader>lc", "<cmd>Php class<cr>"},
         { "<leader>ln", "<cmd>Php namespace<cr>"},
+        { "<leader>lf", "<cmd>Php sort<cr>"},
     },
     dependencies = {
-        "nvim-lua/plenary.nvim", -- optional
         "ccaglak/phptools.nvim", -- optional
         "ccaglak/larago.nvim", -- optional
     }

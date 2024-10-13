@@ -78,7 +78,7 @@ end
 
 function N.get_insertion_point()
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  local insertion_point = nil
+  local insertion_point = 2
 
   for i, line in ipairs(content) do
     if line:find("^declare") then
@@ -86,12 +86,12 @@ function N.get_insertion_point()
     elseif line:find("^namespace") then
       return i, line:find("^namespace")
     elseif
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       return i - 1, nil -- insert before class
     end

@@ -1,36 +1,35 @@
 local M = {}
 
 local function sort_lines(lines)
-  table.sort(lines)
-  return lines
+  return vim.iter(lines):sort():totable()
 end
 
 local function sort_lines_case_insensitive(lines)
-  table.sort(lines, function(a, b)
+  return vim.iter(lines):sort(function(a, b)
     return string.lower(a) < string.lower(b)
-  end)
-  return lines
+  end):totable()
 end
 
 local function sort_lines_reverse(lines)
-  table.sort(lines, function(a, b)
+  return vim.iter(lines):sort(function(a, b)
     return a > b
-  end)
-  return lines
+  end):totable()
 end
 
 local function sort_lines_line_length(lines)
-  table.sort(lines, function(a, b)
-    return #a < #b
-  end)
-  return lines
+  local with_length = vim.tbl_map(function(line)
+    return { len = #line, text = line }
+  end, lines)
+  table.sort(with_length, function(a, b) return a.len < b.len end)
+  return vim.tbl_map(function(item) return item.text end, with_length)
 end
 
 local function sort_lines_line_length_reverse(lines)
-  table.sort(lines, function(a, b)
-    return #a > #b
-  end)
-  return lines
+  local with_length = vim.tbl_map(function(line)
+    return { len = #line, text = line }
+  end, lines)
+  table.sort(with_length, function(a, b) return a.len > b.len end)
+  return vim.tbl_map(function(item) return item.text end, with_length)
 end
 
 local function sort_lines_natural(lines)
@@ -67,8 +66,7 @@ local function sort_lines_natural(lines)
     return #a < #b
   end
 
-  table.sort(lines, natural_compare)
-  return lines
+  return vim.iter(lines):sort(natural_compare):totable()
 end
 
 local sort_functions = {
@@ -83,7 +81,7 @@ local sort_functions = {
 function M.sortUseStatements(sort)
   local lines = vim.api.nvim_buf_get_lines(0, 0, 50, false)
   local use_statements = vim.tbl_filter(function(line)
-    return line:match("^use ")
+    return vim.startswith(line, "use ")
   end, lines)
 
   local sort_function = sort_functions[sort.sort_type]
@@ -91,16 +89,17 @@ function M.sortUseStatements(sort)
 
   local start_line, end_line
   for i, line in ipairs(lines) do
-    if line:match("^use ") and not start_line then
+    if vim.startswith(line, "use ") and not start_line then
       start_line = i - 1
-    elseif start_line and not line:match("^use ") then
+    elseif start_line and not vim.startswith(line, "use ") then
       end_line = i - 1
       break
     end
   end
 
   if start_line and end_line then
-    vim.api.nvim_buf_set_lines(0, start_line, end_line, false, use_statements)
+    local sorted_slice = vim.list_slice(use_statements, 1, end_line - start_line)
+    vim.api.nvim_buf_set_lines(0, start_line, end_line, false, sorted_slice)
   end
 end
 
