@@ -41,9 +41,11 @@ M.notify = function(msg)
 
   vim.defer_fn(function()
     if api.nvim_win_is_valid(win) then
-      close_notification(win, buf)
+      vim.defer_fn(function()
+        close_notification(win, buf)
+      end, 500)
     end
-  end, 3500)
+  end, 3000)
 
   return buf
 end
