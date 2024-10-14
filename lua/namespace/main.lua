@@ -1,7 +1,5 @@
 local ts, api, insert = vim.treesitter, vim.api, table.insert
 
-
-require("namespace.utils")
 local native = require("namespace.native")
 local Queue = require("namespace.queue")
 local com = require("namespace.composer")
@@ -89,7 +87,7 @@ local function get_namespaces()
 
   for i = 0, check_lines - 1 do
     local line = api.nvim_buf_get_lines(0, i, i + 1, false)[1]
-    if vim.fn.match(line, '^\\s*\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)\\s\\+') >= 0 then
+    if vim.fn.match(line, "^\\s*\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)\\s\\+") >= 0 then
       break
     end
     local use_match = line:match("^use%s+(.+);$")
@@ -101,8 +99,6 @@ local function get_namespaces()
 
   return use_statements
 end
-
-
 
 -- Get filtered classes
 
@@ -231,28 +227,21 @@ local function search_autoload_classmap(classes)
 end
 
 local function get_insertion_point()
-  local content = vim.api.nvim_buf_get_lines(0, 0, 50, false)
+  local max_lines = math.min(api.nvim_buf_line_count(0), 50)
   local insertion_point = nil
 
-  for i, line in ipairs(content) do
-    if line:find("^declare") or line:find("^namespace") or line:find("^use") then
-      insertion_point = i
-    end
-
-    if
-        line:find("^class")
-        or line:find("^final")
-        or line:find("^interface")
-        or line:find("^abstract")
-        or line:find("^trait")
-        or line:find("^enum")
-    then
+  for i = 0, max_lines - 1 do
+    local line = api.nvim_buf_get_lines(0, i, i + 1, false)[1]
+    if vim.fn.match(line, "^\\s*\\(declare\\|namespace\\|use\\)\\s\\+") >= 0 then
+      insertion_point = i + 1
+    elseif vim.fn.match(line, "^\\s*\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)\\s\\+") >= 0 then
       break
     end
   end
 
   return insertion_point or 2
 end
+
 
 local function process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
   if #paths > 1 then
@@ -414,7 +403,7 @@ function M.getClass()
 end
 
 function M.getClasses()
-  pr(get_filtered_classes, 1, true)
+  pr(get_insertion_point, 1, true)
   if not has_composer_json() then
     notify("composer.json not found ")
     return
