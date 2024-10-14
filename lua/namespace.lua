@@ -1,7 +1,7 @@
 ---@class Config
 ---@field opt string Your config option
 local config = {
-  ui = false,
+  ui = true,
   cacheOnload = false,
   dumpOnload = false,
   sort = {

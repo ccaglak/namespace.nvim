@@ -1,5 +1,5 @@
-local ts = vim.treesitter
-local api = vim.api
+local ts, api, insert = vim.treesitter, vim.api, table.insert
+
 
 require("namespace.utils")
 local native = require("namespace.native")
@@ -83,11 +83,14 @@ end
 
 -- Get namespaces from the current buffer
 local function get_namespaces()
-  local php_code = api.nvim_buf_get_lines(0, 0, 50, false)
   local use_statements = {}
-  for _, line in ipairs(php_code) do
-    if vim.fn.match(line, "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") > 0 then
-      return use_statements
+  local max_lines = api.nvim_buf_line_count(0)
+  local check_lines = math.min(max_lines, 50)
+
+  for i = 0, check_lines - 1 do
+    local line = api.nvim_buf_get_lines(0, i, i + 1, false)[1]
+    if vim.fn.match(line, '^\\s*\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)\\s\\+') >= 0 then
+      break
     end
     local use_match = line:match("^use%s+(.+);$")
     if use_match then
@@ -95,30 +98,42 @@ local function get_namespaces()
       table.insert(use_statements, { name = last_segment, ns = use_match })
     end
   end
+
   return use_statements
 end
 
+
+
 -- Get filtered classes
+
 local function get_filtered_classes()
-  -- get all classes and removes duplicates
-  local all_classes = table.remove_duplicates(get_classes_from_tree())
+  local function create_set(arr, key)
+    local set = {}
+    for _, item in ipairs(arr) do
+      set[key and item[key] or item] = true
+    end
+    return set
+  end
+  local native_set = create_set(native)
+  local all_classes = get_classes_from_tree()
+  local namespace_set = create_set(get_namespaces(), "name")
 
-  local namespace_classes = get_namespaces()
+  local usable_classes = {}
+  local native_classes = {}
+  local seen = {}
 
-  -- removes namespace classes from all classes
-  local filtered_namespaced_classes = vim.tbl_filter(function(class)
-    return not table.contains2(namespace_classes, class.name)
-  end, all_classes)
-
-  -- removes native classes from filtered classes
-  local native_classes = vim.tbl_filter(function(class)
-    return vim.tbl_contains(native, class.name)
-  end, filtered_namespaced_classes)
-
-  --removes native classes from all classes
-  local usable_classes = vim.tbl_filter(function(class)
-    return not table.contains2(native_classes, class.name)
-  end, filtered_namespaced_classes)
+  for _, class in ipairs(all_classes or {}) do
+    if not seen[class.name] then
+      seen[class.name] = true
+      if not namespace_set[class.name] then
+        if native_set[class.name] then
+          insert(native_classes, class)
+        else
+          insert(usable_classes, class)
+        end
+      end
+    end
+  end
 
   return usable_classes, native_classes
 end
@@ -225,12 +240,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -270,7 +285,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files
@@ -399,6 +414,7 @@ function M.getClass()
 end
 
 function M.getClasses()
+  pr(get_filtered_classes, 1, true)
   if not has_composer_json() then
     notify("composer.json not found ")
     return
