@@ -21,7 +21,9 @@ end
 local M = {}
 
 M.notify = function(msg)
-  if not msg then return end
+  if not msg then
+    return
+  end
 
   local lines = vim.split(msg, "\n")
   local max_width = math.floor(vim.o.columns / 3.5)

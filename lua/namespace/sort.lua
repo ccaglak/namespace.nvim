@@ -70,7 +70,6 @@ local function sort_lines_natural(lines)
   return lines
 end
 
-
 local sort_functions = {
   ascending = sort_lines,
   descending = sort_lines_reverse,

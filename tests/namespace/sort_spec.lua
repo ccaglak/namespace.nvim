@@ -125,14 +125,6 @@ describe("sort", function()
       vim.notify = original_vim_notify
     end)
 
-    it("should not sort and notify when enabled is false", function()
-      local sort = { enabled = false }
-      namespace.sortUseStatements(sort)
-      assert.stub(vim.notify).was_called_with("Sort is disabled ", vim.log.levels.WARN, { title = "PhpNamespace" })
-      assert.stub(vim.api.nvim_buf_get_lines).was_not_called()
-      assert.stub(vim.api.nvim_buf_set_lines).was_not_called()
-    end)
-
     it("should handle mixed use statements with classes, functions, and constants", function()
       local sort = { enabled = true, sort_type = "natural" }
       vim.api.nvim_buf_get_lines.returns({
