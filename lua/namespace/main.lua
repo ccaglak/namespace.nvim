@@ -403,7 +403,6 @@ function M.getClass()
 end
 
 function M.getClasses()
-  pr(get_insertion_point, 1, true)
   if not has_composer_json() then
     notify("composer.json not found ")
     return
