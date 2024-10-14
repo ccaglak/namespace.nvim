@@ -64,13 +64,13 @@ function N.get_prefix_and_src()
 
   if autoload["psr-4"] ~= nil then
     for prefix, src in pairs(autoload["psr-4"]) do
-      table.insert(result, { prefix = prefix, src = src })
+      table.insert(result, { prefix = prefix, src = src:gsub(sep .. "$", "") })
     end
   end
 
   if composer_data["autoload-dev"] ~= nil and composer_data["autoload-dev"]["psr-4"] ~= nil then
     for prefix, src in pairs(composer_data["autoload-dev"]["psr-4"]) do
-      table.insert(result, { prefix = prefix, src = src })
+      table.insert(result, { prefix = prefix, src = src:gsub(sep .. "$", "") })
     end
   end
 
@@ -86,7 +86,9 @@ function N.get_insertion_point()
   local insertion_point = 2
   for i, line in ipairs(content) do
     if line:find("^declare") then
-      insertion_point = i
+      return i, nil
+    elseif line:find("^use") then
+      return i - 1, nil
     elseif line:find("^namespace") then
       return i, line:find("^namespace")
     elseif

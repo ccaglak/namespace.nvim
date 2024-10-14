@@ -11,6 +11,7 @@ end
 M.run_composer_dump_autoload = function()
   if not has_composer_json() then
     notify("'composer.json' not found ")
+    return
   end
 
   local function on_exit(job_id, exit_code, event_type)
@@ -52,7 +53,6 @@ M.setup_cache = function()
       local client = vim.lsp.get_client_by_id(args.data.client_id)
       if client and client.name == "intelephense" or client.name == "phpactor" then
         ns.read_composer_file()
-        -- main.search("*.php", function() end)
       end
     end,
     once = true,

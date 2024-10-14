@@ -1,4 +1,4 @@
-## Namespace.nvim V2 #BETA
+## Namespace.nvim V2
 
 Neovim Php Namespace Resolver
 
@@ -22,10 +22,10 @@ Neovim Php Namespace Resolver
 {  -- lazy
     'ccaglak/namespace.nvim',
     keys = {
-        { "<leader>ls", "<cmd>Php classes<cr>"},
+        { "<leader>la", "<cmd>Php classes<cr>"},
         { "<leader>lc", "<cmd>Php class<cr>"},
         { "<leader>ln", "<cmd>Php namespace<cr>"},
-        { "<leader>lf", "<cmd>Php sort<cr>"},
+        { "<leader>ls", "<cmd>Php sort<cr>"},
     },
     dependencies = {
         "ccaglak/phptools.nvim", -- optional
@@ -37,8 +37,8 @@ Neovim Php Namespace Resolver
       cacheOnload = false, -- default: false -- cache composer.json on load
       dumpOnload = false, -- default: false -- dump composer.json on load
       sort = {
-        on_save = false, -- default: false
-        sort_type = 'length_desc', -- default: natural
+        on_save = false, -- default: false -- sorts on every search
+        sort_type = 'length_desc', -- default: natural -- seam like what pint is sorting
         --  ascending -- descending -- length_asc
         -- length_desc -- natural -- case_insensitive
       }
@@ -49,10 +49,10 @@ Neovim Php Namespace Resolver
 ## Keymaps -- No default keymaps
 
 ```vim
-    vim.keymap.set("n", "<leader>la", "<cmd>Php classes<cr>")
-    vim.keymap.set("n", "<leader>lc", "<cmd>Php class<cr>")
-    vim.keymap.set("n", "<leader>ln", "<cmd>Php namespace<cr>")
-    vim.keymap.set("n", "<leader>ls", "<cmd>Php sort<cr>")
+    vim.keymap.set("n", "<leader>la", "<cmd>Php classes<cr>", {desc="GetClasses", silent = true})
+    vim.keymap.set("n", "<leader>lc", "<cmd>Php class<cr>", {desc="GetClass",silent = true})
+    vim.keymap.set("n", "<leader>ln", "<cmd>Php namespace<cr>", {desc="Namespace",silent = true})
+    vim.keymap.set("n", "<leader>ls", "<cmd>Php sort<cr>", {desc="Sort Classes",silent = true})
 ```
 
 ## Requires
