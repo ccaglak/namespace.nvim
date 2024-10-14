@@ -136,48 +136,48 @@ describe("composer", function()
       namespace.read_composer_file.returns({
         autoload = {
           ["psr-4"] = {
-            ["App\\"] = "app/",
+            ["App\\"] = "app",
           },
         },
       })
       local result = namespace.get_prefix_and_src()
-      assert.are.same({ { prefix = "App\\", src = "app/" } }, result)
+      assert.are.same({ { prefix = "App\\", src = "app" } }, result)
     end)
 
     it("should return psr-4 data from autoload-dev", function()
       namespace.read_composer_file.returns({
         autoload = {
           ["psr-4"] = {
-            ["App\\"] = "app/",
+            ["App\\"] = "app",
           },
         },
         ["autoload-dev"] = {
           ["psr-4"] = {
-            ["Tests\\"] = "tests/",
+            ["Tests\\"] = "tests",
           },
         },
       })
       local result = namespace.get_prefix_and_src()
-      assert.are.same({ { prefix = "App\\", src = "app/" }, { prefix = "Tests\\", src = "tests/" } }, result)
+      assert.are.same({ { prefix = "App\\", src = "app" }, { prefix = "Tests\\", src = "tests" } }, result)
     end)
 
     it("should return combined psr-4 data from autoload and autoload-dev", function()
       namespace.read_composer_file.returns({
         autoload = {
           ["psr-4"] = {
-            ["App\\"] = "app/",
+            ["App\\"] = "app",
           },
         },
         ["autoload-dev"] = {
           ["psr-4"] = {
-            ["Tests\\"] = "tests/",
+            ["Tests\\"] = "tests",
           },
         },
       })
       local result = namespace.get_prefix_and_src()
       assert.are.same({
-        { prefix = "App\\", src = "app/" },
-        { prefix = "Tests\\", src = "tests/" },
+        { prefix = "App\\",   src = "app" },
+        { prefix = "Tests\\", src = "tests" },
       }, result)
     end)
 

@@ -86,20 +86,20 @@ function N.get_insertion_point()
   local insertion_point = 2
   for i, line in ipairs(content) do
     if line:find("^declare") then
-      return i, nil
-    elseif line:find("^use") then
-      return i - 1, nil
+      insertion_point = i
     elseif line:find("^namespace") then
       return i, line:find("^namespace")
+    elseif line:find("^use") then
+      return insertion_point, nil
     elseif
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
-      return i - 1, nil -- insert before class
+      return insertion_point, nil -- insert before class
     end
   end
 
