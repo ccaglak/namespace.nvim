@@ -22,7 +22,7 @@ describe("mainTest", function()
     end)
 
     it("should handle single class search", function()
-      namespace.get_project_root.returns("/home/runner/work/namespace.nvim/vendor")
+      namespace.get_project_root.returns("/home/runner/work/namespace.nvim")
 
       -- namespace.get_project_root.returns("/home/user/project")
       vim.fn.system.returns("'Namespace\\Class' => $baseDir . '/src/Class.php'")
@@ -32,7 +32,7 @@ describe("mainTest", function()
       assert.are.same({ Class = { { fqcn = "Namespace\\Class", path = "/src/Class.php" } } }, result)
       assert
         .stub(vim.fn.system)
-        .was_called_with("rg '/Class.php' /home/runner/work/namespace.nvim/namespace.nvim/vendor/composer/autoload_classmap.php")
+        .was_called_with("rg '/Class.php' /home/runner/work/namespace.nvim/vendor/composer/autoload_classmap.php")
     end)
 
     it("should handle classes with no matches", function()
