@@ -81,14 +81,11 @@ end
 
 -- Get namespaces from the current buffer
 local function get_namespaces()
+  local php_code = api.nvim_buf_get_lines(0, 0, 50, false)
   local use_statements = {}
-  local max_lines = api.nvim_buf_line_count(0)
-  local check_lines = math.min(max_lines, 50)
-
-  for i = 0, check_lines - 1 do
-    local line = api.nvim_buf_get_lines(0, i, i + 1, false)[1]
-    if vim.fn.match(line, "^\\s*\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)\\s\\+") >= 0 then
-      break
+  for _, line in ipairs(php_code) do
+    if vim.fn.match(line, "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") > 0 then
+      return use_statements
     end
     local use_match = line:match("^use%s+(.+);$")
     if use_match then
@@ -96,7 +93,6 @@ local function get_namespaces()
       table.insert(use_statements, { name = last_segment, ns = use_match })
     end
   end
-
   return use_statements
 end
 
@@ -141,7 +137,8 @@ local function transform_path(path, prefix_table, workspace_root, composer)
   end
 
   local relative_path = path:gsub(workspace_root, "")
-  relative_path = relative_path:gsub("^" .. sep, "") -- first slash
+  relative_path = relative_path:gsub("^/", "") -- first slash
+  relative_path = relative_path:gsub("^\\", "") -- first slash
   relative_path = relative_path:gsub("\\\\", "\\")
   relative_path = relative_path:gsub(sep, "\\")
   relative_path = relative_path:gsub("%.php$", "") -- Remove .php extension
@@ -227,21 +224,28 @@ local function search_autoload_classmap(classes)
 end
 
 local function get_insertion_point()
-  local max_lines = math.min(api.nvim_buf_line_count(0), 50)
+  local content = vim.api.nvim_buf_get_lines(0, 0, 50, false)
   local insertion_point = nil
 
-  for i = 0, max_lines - 1 do
-    local line = api.nvim_buf_get_lines(0, i, i + 1, false)[1]
-    if vim.fn.match(line, "^\\s*\\(declare\\|namespace\\|use\\)\\s\\+") >= 0 then
-      insertion_point = i + 1
-    elseif vim.fn.match(line, "^\\s*\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)\\s\\+") >= 0 then
+  for i, line in ipairs(content) do
+    if line:find("^declare") or line:find("^namespace") or line:find("^use") then
+      insertion_point = i
+    end
+
+    if
+      line:find("^class")
+      or line:find("^final")
+      or line:find("^interface")
+      or line:find("^abstract")
+      or line:find("^trait")
+      or line:find("^enum")
+    then
       break
     end
   end
 
   return insertion_point or 2
 end
-
 
 local function process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
   if #paths > 1 then
@@ -274,7 +278,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files

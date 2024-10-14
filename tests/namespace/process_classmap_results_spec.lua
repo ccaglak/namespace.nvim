@@ -1,4 +1,5 @@
 local namespace = require("tests.namespace.mainTest")
+local vui = require("namespace.ui").select
 local stub = require("luassert.stub")
 
 describe("mainTest", function()
@@ -8,16 +9,16 @@ describe("mainTest", function()
     local callback
 
     before_each(function()
-      original_ui_select = vim.ui.select
+      original_ui_select = vui
       original_fnamemodify = vim.fn.fnamemodify
-      vim.ui.select = stub.new()
+      vui = stub.new()
       vim.fn.fnamemodify = stub.new()
       callback = stub.new()
       stub(namespace, "transform_path")
     end)
 
     after_each(function()
-      vim.ui.select = original_ui_select
+      vui = original_ui_select
       vim.fn.fnamemodify = original_fnamemodify
       namespace.transform_path:revert()
     end)
@@ -66,7 +67,7 @@ describe("mainTest", function()
 
       assert.is_true(result)
       assert.stub(callback).was_called_with("use Namespace\\TestClass;")
-      assert.stub(vim.ui.select).was_called()
+      assert.stub(vui).was_called()
     end)
 
     it("should handle user cancellation in multiple paths scenario", function()

@@ -79,8 +79,11 @@ end
 
 function N.get_insertion_point()
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  local insertion_point = 2
+  if #content <= 0 then
+    return nil
+  end
 
+  local insertion_point = 2
   for i, line in ipairs(content) do
     if line:find("^declare") then
       insertion_point = i

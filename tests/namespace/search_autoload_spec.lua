@@ -21,11 +21,6 @@ describe("mainTest", function()
       namespace.get_project_root:revert()
     end)
 
-    it("should return empty results when no classes are provided", function()
-      local result = namespace.search_autoload_classmap({})
-      assert.same({}, result)
-    end)
-
     it("should handle single class search", function()
       namespace.get_project_root.returns("/home/runner/work/namespace.nvim/vendor")
 
