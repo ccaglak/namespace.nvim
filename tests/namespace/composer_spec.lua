@@ -176,7 +176,7 @@ describe("composer", function()
       })
       local result = namespace.get_prefix_and_src()
       assert.are.same({
-        { prefix = "App\\",   src = "app" },
+        { prefix = "App\\", src = "app" },
         { prefix = "Tests\\", src = "tests" },
       }, result)
     end)

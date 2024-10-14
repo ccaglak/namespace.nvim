@@ -92,12 +92,12 @@ function N.get_insertion_point()
     elseif line:find("^use") then
       return insertion_point, nil
     elseif
-        line:find("^class")
-        or line:find("^final")
-        or line:find("^interface")
-        or line:find("^abstract")
-        or line:find("^trait")
-        or line:find("^enum")
+      line:find("^class")
+      or line:find("^final")
+      or line:find("^interface")
+      or line:find("^abstract")
+      or line:find("^trait")
+      or line:find("^enum")
     then
       return insertion_point, nil -- insert before class
     end
