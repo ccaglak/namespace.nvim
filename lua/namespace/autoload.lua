@@ -27,7 +27,6 @@ M.run_composer_dump_autoload = function()
     end
   end
 
-
   vim.fn.jobstart({ "composer", "dump-autoload", "-o" }, {
     cwd = project_root,
     on_exit = on_exit,
