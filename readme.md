@@ -1,19 +1,19 @@
-## Namespace.nvim -only works on latest stable for nightly v11 use branch v2
+## Namespace.nvim V2
 
 Neovim Php Namespace Resolver
 
-- Feels better then intelephense & phpactor features
+- Namespace.nvim is a powerful Neovim plugin for PHP namespace resolution.
 
 [![asciicast](https://asciinema.org/a/558130.svg)](https://asciinema.org/a/558130)
 
-## Treesitter php updates might break the plugin if plugin doesn't behave as normal report the as issue.
-
 ## Basic Usage
 
--   `:GetClasses` Finds all classes, traits, implementations, attributes, from composer or from local search
--   `:GetClass` gets class under cursor
--   `:ClassAs` class As -- gets class under cursor or on empty
--   `:Namespace` generates namespace
+- `:Php classes`: Find all classes, traits, implementations, and attributes from Composer or local search.
+- `:Php class`: Get the class under the cursor.
+- `:Php namespace`: Generate namespace for the current file.
+- `:Php sort`: Sorts namespaces in current file with 6 options.
+
+
 
 ## Install
 
@@ -22,56 +22,46 @@ Neovim Php Namespace Resolver
 {  -- lazy
     'ccaglak/namespace.nvim',
     keys = {
-        { "<leader>la", "<cmd>GetClasses<cr>"},
-        { "<leader>lc", "<cmd>GetClass<cr>"},
-        { "<leader>ls", "<cmd>ClassAs<cr>"},
-        { "<leader>ln", "<cmd>Namespace<cr>"},
+        { "<leader>la", "<cmd>Php classes<cr>"},
+        { "<leader>lc", "<cmd>Php class<cr>"},
+        { "<leader>ln", "<cmd>Php namespace<cr>"},
+        { "<leader>ls", "<cmd>Php sort<cr>"},
     },
     dependencies = {
-        "nvim-lua/plenary.nvim"
+        "ccaglak/phptools.nvim", -- optional
+        "ccaglak/larago.nvim", -- optional
     }
+    config = function()
+    require('namespace').setup({
+      ui = true, -- default: true -- false only if you want to use your own ui
+      cacheOnload = false, -- default: false -- cache composer.json on load
+      dumpOnload = false, -- default: false -- dump composer.json on load
+      sort = {
+        on_save = false, -- default: false -- sorts on every search
+        sort_type = 'length_desc', -- default: natural -- seam like what pint is sorting
+        --  ascending -- descending -- length_asc
+        -- length_desc -- natural -- case_insensitive
+      }
+    })
+    end
 }
-
-```
-## if you get "Not an Editor Command" error then use
-```lua
- { -- lazy
-    ft = { 'php' },
-    'ccaglak/namespace.nvim',
-    keys = {
-        { '<leader>lc', '<cmd>lua require("namespace.getClass").get()<cr>',   { desc = 'GetClass' } },
-        { '<leader>la', '<cmd>lua require("namespace.getClasses").get()<cr>', { desc = 'GetClasses' } },
-        { "<leader>ls", '<cmd>lua require("namespace.classAs").open()<cr>', { desc = 'ClassAs' } },
-        { "<leader>ln", '<cmd>lua require("namespace.namespace").gen()<cr>', { desc = 'Generate Namespace' } },
-    },
-   dependencies = {
-        "nvim-lua/plenary.nvim"
-    }
-}
-```
 
 ## Keymaps -- No default keymaps
 
 ```vim
-    vim.keymap.set("n", "<leader>la", "<cmd>GetClasses<cr>")
-    vim.keymap.set("n", "<leader>lc", "<cmd>GetClass<cr>")
-    vim.keymap.set("n", "<leader>ls", "<cmd>ClassAs<cr>")
-    vim.keymap.set("n", "<leader>ln", "<cmd>Namespace<cr>")
+    vim.keymap.set("n", "<leader>la", "<cmd>Php classes<cr>", {desc="GetClasses", silent = true})
+    vim.keymap.set("n", "<leader>lc", "<cmd>Php class<cr>", {desc="GetClass",silent = true})
+    vim.keymap.set("n", "<leader>ln", "<cmd>Php namespace<cr>", {desc="Namespace",silent = true})
+    vim.keymap.set("n", "<leader>ls", "<cmd>Php sort<cr>", {desc="Sort Classes",silent = true})
 ```
 
 ## Requires
 
--   pleanery.nvim
 -   nvim-treesitter (`:TSInstall php json`)
 -   brew install ripgrep
 
-## Features to be add
-    -- needs to be cleanup/refactored
-    -- add missing method/class etc
-
 ## Known bugs
 -   no known bugs
--   Let me know if you have any edge cases
 
 ## Check Out
 
