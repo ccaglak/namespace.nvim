@@ -1,5 +1,6 @@
 local ensure_install = function(plugin)
-  local base_dir = os.getenv("BASE_DIR") or "/Users/oguz/.local/share/nvim/lazy/"
+  local base_dir = os.getenv("BASE_DIR") or "/tmp/"
+  -- local base_dir = os.getenv("BASE_DIR") or "/Users/oguz/.local/share/nvim/lazy/"
   local plugin_name = vim.split(plugin, "/")[2]
 
   local plugin_dir = base_dir .. plugin_name
