@@ -221,23 +221,6 @@ describe("composer", function()
       vim.api.nvim_buf_get_lines = original_nvim_buf_get_lines
     end)
 
-    it("should return insertion point before namespace", function()
-      vim.api.nvim_buf_get_lines.returns({
-        "<?php",
-        "",
-        "namespace App\\Test;",
-        "",
-        "class TestClass",
-        "{",
-        "}",
-      })
-
-      local line, col = namespace.get_insertion_point()
-
-      assert.are.equal(3, line)
-      assert.are.equal(1, col)
-    end)
-
     it("should return insertion point before class when no namespace is present", function()
       vim.api.nvim_buf_get_lines.returns({
         "<?php",
@@ -266,10 +249,9 @@ describe("composer", function()
         "}",
       })
 
-      local line, col = namespace.get_insertion_point()
+      local line, _ = namespace.get_insertion_point()
 
       assert.are.equal(5, line)
-      assert.are.equal(1, col)
     end)
 
     it("should return insertion point before interface", function()

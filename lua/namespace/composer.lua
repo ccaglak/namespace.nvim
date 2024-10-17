@@ -79,6 +79,10 @@ end
 
 function N.get_insertion_point()
   local content = api.nvim_buf_get_lines(0, 0, -1, false)
+  if #content == 0 then
+    return nil
+  end
+
   local insertion_point = 2
 
   for i, line in ipairs(content) do
@@ -86,8 +90,10 @@ function N.get_insertion_point()
       insertion_point = i
     elseif vim.fn.match(line, "^\\(namespace\\)") >= 0 then
       return i, vim.fn.match(line, "^\\(namespace\\)")
-    elseif vim.fn.match(line, "^\\(use\\|class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") >= 0 then
-      return insertion_point
+    elseif vim.fn.match(line, "^\\(use\\)") >= 0 then
+      return insertion_point, nil
+    elseif vim.fn.match(line, "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") >= 0 then
+      return insertion_point, nil
     end
   end
 
