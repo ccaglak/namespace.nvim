@@ -135,25 +135,22 @@ local function transform_path(path, prefix_table, workspace_root, composer)
   if not path then
     return nil
   end
-
-  local relative_path = path:gsub(workspace_root, "")
-  relative_path = relative_path:gsub("^/", "") -- first slash
-  relative_path = relative_path:gsub("^\\", "") -- first slash
-  relative_path = relative_path:gsub("\\\\", "\\")
-  relative_path = relative_path:gsub(sep, "\\")
-  relative_path = relative_path:gsub("%.php$", "") -- Remove .php extension
-  relative_path = "use " .. relative_path .. ";"
-
-  if not composer then
-    local first_segment, rest = relative_path:match("use ([^\\]+)\\(.*)")
-    for _, prefix_entry in ipairs(prefix_table) do
-      if first_segment == prefix_entry.src then
-        return string.format("use %s%s", prefix_entry.prefix, rest)
-      end
-    end
+  if composer then
+    return "use " .. path:gsub("\\\\", "\\") .. ";"
   end
 
-  return relative_path
+  path = path
+    :gsub(workspace_root, "")
+    :gsub("^" .. sep, "") -- remove first slash
+    :gsub(sep, "\\") -- turn all separators backslashes
+    :gsub("%.php$", "") -- remove .php
+
+  local first_segment, rest = path:match("([^\\]+)\\(.*)")
+  for _, prefix_entry in ipairs(prefix_table) do
+    if first_segment == prefix_entry.src then
+      return string.format("use %s%s;", prefix_entry.prefix, rest)
+    end
+  end
 end
 
 local function async_search_files(pattern, callback)
@@ -224,27 +221,21 @@ local function search_autoload_classmap(classes)
 end
 
 local function get_insertion_point()
-  local content = vim.api.nvim_buf_get_lines(0, 0, 50, false)
-  local insertion_point = nil
+  local content = api.nvim_buf_get_lines(0, 0, -1, false)
+  if #content == 0 then
+    return nil
+  end
+  local insertion_point = 2
 
   for i, line in ipairs(content) do
-    if line:find("^declare") or line:find("^namespace") or line:find("^use") then
+    if vim.fn.match(line, "^\\(declare\\|namespace\\|use\\)") >= 0 then
       insertion_point = i
-    end
-
-    if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
-    then
-      break
+    elseif vim.fn.match(line, "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") >= 0 then
+      return insertion_point
     end
   end
 
-  return insertion_point or 2
+  return insertion_point
 end
 
 local function process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
