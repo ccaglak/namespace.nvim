@@ -3,14 +3,14 @@ local M = {}
 local notify = require("namespace.notify").notify
 local ns = require("namespace.composer")
 
+local project_root = vim.fs.root(0, { "composer.json", ".git", "package.json", ".env" }) or vim.uv.cwd()
+
 local function has_composer_json()
-  local workspace_root = vim.fs.root(0, { "composer.json", ".git" })
-  local composer_json_path = workspace_root .. "/composer.json"
+  local composer_json_path = project_root .. "/composer.json"
   return vim.fn.filereadable(composer_json_path) == 1
 end
 
 M.run_composer_dump_autoload = function()
-  local project_root = vim.fs.root(0, { "composer.json", ".git" })
   vim.fn.chdir(project_root)
 
   if not has_composer_json() then

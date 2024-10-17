@@ -12,14 +12,14 @@ if config.ui == false then
   vui = vim.ui.select
 end
 
-local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
-
 local cache = {
   root = nil,
   file_search_results = {},
   treesitter_queries = {},
   composer_prefix_src = nil,
 }
+
+local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
 
 local function get_project_root()
   if cache.root ~= nil then
@@ -137,7 +137,7 @@ local function transform_path(path, prefix_table, workspace_root, composer)
   end
 
   local relative_path = path:gsub(workspace_root, "")
-  relative_path = relative_path:gsub("^/", "") -- first slash
+  relative_path = relative_path:gsub("^/", "")  -- first slash
   relative_path = relative_path:gsub("^\\", "") -- first slash
   relative_path = relative_path:gsub("\\\\", "\\")
   relative_path = relative_path:gsub(sep, "\\")
@@ -233,12 +233,12 @@ local function get_insertion_point()
     end
 
     if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
+        line:find("^class")
+        or line:find("^final")
+        or line:find("^interface")
+        or line:find("^abstract")
+        or line:find("^trait")
+        or line:find("^enum")
     then
       break
     end
@@ -278,7 +278,7 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
     if files and #files == 1 then
       matching_files = vim.tbl_filter(function(file)
         return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
+            and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
       end, files)
     else
       matching_files = files

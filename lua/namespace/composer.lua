@@ -8,7 +8,7 @@ local cache = {
 }
 
 local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
-local root = vim.fs.root(0, { "composer.json", ".git" })
+local root = vim.fs.root(0, { "composer.json", ".git", "package.json", ".env" }) or vim.uv.cwd()
 
 -- split to remove
 local function parse(str)
@@ -30,7 +30,7 @@ function N.resolve_namespace()
   current_dir = current_dir:gsub(root, ""):gsub(sep, "\\")
 
   for _, entry in ipairs(prefix_and_src or {}) do
-    if current_dir:find(entry.src:sub(1, -1)) ~= nil then
+    if current_dir:find(entry.src) ~= nil then
       return parse(current_dir:gsub(entry.src, entry.prefix))
     end
   end
@@ -78,28 +78,16 @@ function N.get_prefix_and_src()
 end
 
 function N.get_insertion_point()
-  local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  if #content <= 0 then
-    return nil
-  end
-
+  local content = api.nvim_buf_get_lines(0, 0, -1, false)
   local insertion_point = 2
+
   for i, line in ipairs(content) do
-    if line:find("^declare") then
+    if vim.fn.match(line, "^\\(declare\\)") >= 0 then
       insertion_point = i
-    elseif line:find("^namespace") then
-      return i, line:find("^namespace")
-    elseif line:find("^use") then
-      return insertion_point, nil
-    elseif
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
-    then
-      return insertion_point, nil -- insert before class
+    elseif vim.fn.match(line, "^\\(namespace\\)") >= 0 then
+      return i, vim.fn.match(line, "^\\(namespace\\)")
+    elseif vim.fn.match(line, "^\\(use\\|class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") >= 0 then
+      return insertion_point
     end
   end
 
