@@ -1,8 +1,8 @@
 local api = vim.api
-local lsp_util = vim.lsp.util
+local lsp = vim.lsp.util
 
-local UI = {}
-function UI.select(items, opts, on_choice)
+local M = {}
+function M.select(items, opts, on_choice)
   local choices = {}
   local longest_item = 0
 
@@ -12,7 +12,7 @@ function UI.select(items, opts, on_choice)
     longest_item = math.max(longest_item, #choice)
   end
 
-  local bufnr, winnr = lsp_util.open_floating_preview(choices, "", {
+  local bufnr, winnr = lsp.open_floating_preview(choices, "", {
     border = "rounded",
     title = opts.prompt,
     title_pos = "center",
@@ -36,4 +36,4 @@ function UI.select(items, opts, on_choice)
   end, { buffer = bufnr })
 end
 
-return UI
+return M
