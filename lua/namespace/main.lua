@@ -296,23 +296,16 @@ local function process_file_search(class_entry, prefix, workspace_root, current_
 end
 
 local function process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
-  process_file_search(class_entry, prefix, workspace_root, current_directory, function(result)
-    if result then
-      callback(result)
-    else
-      local classmap_results = search_autoload_classmap({ class_entry })
-      if classmap_results[class_entry.name] then
-        local paths = classmap_results[class_entry.name]
-        if type(paths) == "table" then
-          process_classmap_results(paths, class_entry.name, prefix, workspace_root, current_directory, callback)
-        else
-          callback(nil)
-        end
-      else
-        callback(nil)
+  local classmap_results = search_autoload_classmap({ class_entry })
+  if classmap_results[class_entry.name] then
+    local paths = classmap_results[class_entry.name]
+    if type(paths) == "table" then
+      if process_classmap_results(paths, class_entry.name, prefix, workspace_root, current_directory, callback) then
+        return
       end
     end
-  end)
+  end
+  process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
 end
 
 local function process_class_queue(queue, prefix, workspace_root, current_directory, callback)
