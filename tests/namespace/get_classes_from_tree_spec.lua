@@ -34,6 +34,7 @@ describe("M.get_classes_from_tree()", function()
         $obj = new SomeClass();
         if ($result instanceof AnotherClass){}
         }
+        use WeakMap;
       }
     ]]
 
@@ -56,6 +57,7 @@ describe("M.get_classes_from_tree()", function()
       { name = "StaticClass" },
       { name = "Attribute" },
       { name = "EnumClass" },
+      { name = "WeakMap" },
     }, result))
   end)
 

@@ -1,20 +1,16 @@
 local ts, api, insert = vim.treesitter, vim.api, table.insert
 
-local M = {}
-
 local native = require("namespace.native")
 local Queue = require("namespace.queue")
 local com = require("namespace.composer")
 local sort = require("namespace.sort")
 local config = require("namespace").config
-local vui = require("namespace.ui").select
+local vus = require("namespace.ui").select
 local notify = require("namespace.notify").notify
-
+local M = {}
 if config.ui == false then
-  vui = vim.ui.select
+  vus = vim.ui.select
 end
-
-local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
 
 local cache = {
   root = nil,
@@ -23,11 +19,13 @@ local cache = {
   composer_prefix_src = nil,
 }
 
+local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
+
 function M.get_project_root()
   if cache.root ~= nil then
     return cache.root
   end
-  cache.root = vim.fs.root(0, { "composer.json", ".git", "package.json", ".env" }) or vim.uv.cwd()
+  cache.root = vim.fs.root(0, { "composer.json", ".git", ".env" }) or vim.uv.cwd()
   return cache.root
 end
 
@@ -37,7 +35,7 @@ function M.get_current_file_directory()
   return current_file:gsub(M.get_project_root(), "")
 end
 
-local function get_cached_query(language, query_string)
+function M.get_cached_query(language, query_string)
   local key = language .. query_string
   if not cache.treesitter_queries[key] then
     cache.treesitter_queries[key] = vim.treesitter.query.parse(language, query_string)
@@ -55,7 +53,7 @@ function M.get_classes_from_tree(bufnr)
   local syntax_tree = language_tree:parse()
   local root = syntax_tree[1]:root()
 
-  local query = get_cached_query(
+  local query = M.get_cached_query(
     "php",
     [[
         (attribute (name) @att)
@@ -137,25 +135,22 @@ function M.transform_path(path, prefix_table, workspace_root, composer)
   if not path then
     return nil
   end
-
-  local relative_path = path:gsub(workspace_root, "")
-  relative_path = relative_path:gsub("^/", "") -- first slash
-  relative_path = relative_path:gsub("^\\", "") -- first slash
-  relative_path = relative_path:gsub("\\\\", "\\")
-  relative_path = relative_path:gsub(sep, "\\")
-  relative_path = relative_path:gsub("%.php$", "") -- Remove .php extension
-  relative_path = "use " .. relative_path .. ";"
-
-  if not composer then
-    local first_segment, rest = relative_path:match("use ([^\\]+)\\(.*)")
-    for _, prefix_entry in ipairs(prefix_table) do
-      if first_segment == prefix_entry.src then
-        return string.format("use %s%s", prefix_entry.prefix, rest)
-      end
-    end
+  if composer then
+    return "use " .. path:gsub("\\\\", "\\") .. ";"
   end
 
-  return relative_path
+  path = path
+    :gsub(workspace_root, "")
+    :gsub("^" .. sep, "") -- remove first slash
+    :gsub(sep, "\\") -- turn all separators backslashes
+    :gsub("%.php$", "") -- remove .php
+
+  local first_segment, rest = path:match("([^\\]+)\\(.*)")
+  for _, prefix_entry in ipairs(prefix_table) do
+    if first_segment == prefix_entry.src then
+      return string.format("use %s%s;", prefix_entry.prefix, rest)
+    end
+  end
 end
 
 function M.async_search_files(pattern, callback)
@@ -182,8 +177,6 @@ function M.async_search_files(pattern, callback)
     "!storage",
     "--glob",
     "!public",
-    "--glob",
-    "!database",
     "--glob",
     "!config",
     "--glob",
@@ -227,97 +220,77 @@ function M.search_autoload_classmap(classes)
 end
 
 function M.get_insertion_point()
-  local content = vim.api.nvim_buf_get_lines(0, 0, 50, false)
-  local insertion_point = nil
+  local content = api.nvim_buf_get_lines(0, 0, -1, false)
+  if #content == 0 then
+    return nil
+  end
+  local insertion_point = 2
 
   for i, line in ipairs(content) do
-    if line:find("^declare") or line:find("^namespace") or line:find("^use") then
+    if vim.fn.match(line, "^\\(declare\\|namespace\\|use\\)") >= 0 then
       insertion_point = i
-    end
-
-    if
-      line:find("^class")
-      or line:find("^final")
-      or line:find("^interface")
-      or line:find("^abstract")
-      or line:find("^trait")
-      or line:find("^enum")
-    then
-      break
+    elseif vim.fn.match(line, "^\\(class\\|final\\|interface\\|abstract\\|trait\\|enum\\)") >= 0 then
+      return insertion_point
     end
   end
 
-  return insertion_point or 2
+  return insertion_point
 end
 
-function M.process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
-  if #paths > 1 then
-    vui(paths, {
-      prompt = "Select the appropriate " .. class_name,
-      format_item = function(item)
-        return item.fqcn
-      end,
-    }, function(choice)
-      if choice and vim.fn.fnamemodify(choice.path, ":h") ~= current_directory then
-        local use_statement = M.transform_path(choice.fqcn, prefix, workspace_root, true)
-        callback(use_statement)
-      else
-        callback(nil)
+function M.table_unique(tbl)
+  return vim.fn.uniq(vim.fn.sort(vim.fn.copy(tbl)))
+end
+
+function M.process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
+  local all_results = {}
+  local same_path = false
+  local file_path, transform_input
+  local function process_paths(paths, is_composer)
+    for _, path in ipairs(paths) do
+      file_path = is_composer and path.path or path
+      transform_input = is_composer and path.fqcn or file_path
+      local dir = vim.fn.fnamemodify(file_path, ":h"):gsub("^" .. sep, "")
+      current_directory = current_directory:gsub("^" .. sep, "")
+      if #paths == 1 and dir ~= current_directory then
+        table.insert(all_results, M.transform_path(transform_input, prefix, workspace_root, is_composer))
+      elseif #paths > 1 then
+        if dir == current_directory then
+          same_path = true
+        end
+        table.insert(all_results, M.transform_path(transform_input, prefix, workspace_root, is_composer))
       end
-    end)
-  elseif #paths == 1 and vim.fn.fnamemodify(paths[1].path, ":h") ~= current_directory then
-    local use_statement = M.transform_path(paths[1].fqcn, prefix, workspace_root, true)
-    callback(use_statement)
-  else
-    return false
-  end
-  return true
-end
-
-function M.process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
-  M.async_search_files(class_entry.name .. ".php", function(files)
-    local matching_files
-
-    if files and #files == 1 then
-      matching_files = vim.tbl_filter(function(file)
-        return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
-      end, files)
-    else
-      matching_files = files
     end
+  end
 
-    matching_files = vim.tbl_map(function(file)
-      return M.transform_path(file, prefix, workspace_root)
-    end, matching_files)
+  local classmap_results = M.search_autoload_classmap({ class_entry })
+  if classmap_results[class_entry.name] then
+    process_paths(classmap_results[class_entry.name], true)
+  end
 
-    if #matching_files == 1 then
-      callback(matching_files[1])
-    elseif #matching_files > 1 then
-      vui(matching_files, {
-        prompt = "Select the appropriate " .. class_entry.name,
+  M.async_search_files(class_entry.name .. ".php", function(files)
+    process_paths(files, false)
+    all_results = M.table_unique(all_results)
+
+    if #all_results == 1 then
+      callback(all_results[1])
+    elseif #all_results > 1 then
+      M.vim_ui_select(all_results, {
+        prompt = string.format("Select the appropriate (%s%s)", same_path and "*** " or "", class_entry.name),
         format_item = function(item)
           return item
         end,
-      }, callback)
+      }, function(choice)
+        if same_path and M.transform_path(transform_input, prefix, workspace_root, false) == choice then
+          callback(nil)
+        else
+          callback(choice)
+        end
+      end)
     else
       notify("No matches found for " .. class_entry.name)
       callback(nil)
     end
   end)
-end
-
-function M.process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
-  local classmap_results = M.search_autoload_classmap({ class_entry })
-  if classmap_results[class_entry.name] then
-    local paths = classmap_results[class_entry.name]
-    if type(paths) == "table" then
-      if M.process_classmap_results(paths, class_entry.name, prefix, workspace_root, current_directory, callback) then
-        return
-      end
-    end
-  end
-  M.process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
 end
 
 function M.process_class_queue(queue, prefix, workspace_root, current_directory, callback)

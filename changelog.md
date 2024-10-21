@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.0] - 2024-10-19
+
+### Changed
+- Namespace Resolution algorithm
+- Compare both workspace and composer autoloader results for class resolution
+
 ## [2.2.0] - 2024-10-19
 
 ### Changed

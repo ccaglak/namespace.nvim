@@ -5,11 +5,11 @@ local Queue = require("namespace.queue")
 local com = require("namespace.composer")
 local sort = require("namespace.sort")
 local config = require("namespace").config
-local vui = require("namespace.ui").select
+local vim_ui_select = require("namespace.ui").select
 local notify = require("namespace.notify").notify
 
 if config.ui == false then
-  vui = vim.ui.select
+  vim_ui_select = vim.ui.select
 end
 
 local cache = {
@@ -25,7 +25,7 @@ local function get_project_root()
   if cache.root ~= nil then
     return cache.root
   end
-  cache.root = vim.fs.root(0, { "composer.json", ".git", "package.json", ".env" }) or vim.uv.cwd()
+  cache.root = vim.fs.root(0, { "composer.json", ".git", ".env" }) or vim.uv.cwd()
   return cache.root
 end
 
@@ -163,7 +163,7 @@ local function async_search_files(pattern, callback)
     "rg",
     "--files",
     "--glob",
-    pattern,
+    pattern .. ".php",
     "--glob",
     "!vendor",
     "--glob",
@@ -177,8 +177,6 @@ local function async_search_files(pattern, callback)
     "!storage",
     "--glob",
     "!public",
-    "--glob",
-    "!database",
     "--glob",
     "!config",
     "--glob",
@@ -215,6 +213,7 @@ local function search_autoload_classmap(classes)
         table.insert(file_paths, { fqcn = fqcn, path = file_path })
       end
     end
+
     results[class.name] = file_paths
   end
   return results
@@ -238,77 +237,57 @@ local function get_insertion_point()
   return insertion_point
 end
 
-local function process_classmap_results(paths, class_name, prefix, workspace_root, current_directory, callback)
-  if #paths > 1 then
-    vui(paths, {
-      prompt = "Select the appropriate " .. class_name,
-      format_item = function(item)
-        return item.fqcn
-      end,
-    }, function(choice)
-      if choice and vim.fn.fnamemodify(choice.path, ":h") ~= current_directory then
-        local use_statement = transform_path(choice.fqcn, prefix, workspace_root, true)
-        callback(use_statement)
-      else
-        callback(nil)
-      end
-    end)
-  elseif #paths == 1 and vim.fn.fnamemodify(paths[1].path, ":h") ~= current_directory then
-    local use_statement = transform_path(paths[1].fqcn, prefix, workspace_root, true)
-    callback(use_statement)
-  else
-    return false
-  end
-  return true
-end
-
-local function process_file_search(class_entry, prefix, workspace_root, current_directory, callback)
-  async_search_files(class_entry.name .. ".php", function(files)
-    local matching_files
-
-    if files and #files == 1 then
-      matching_files = vim.tbl_filter(function(file)
-        return file:match(class_entry.name:gsub("\\", "/") .. ".php$")
-          and vim.fn.fnamemodify(file, ":h") ~= current_directory:sub(2)
-      end, files)
-    else
-      matching_files = files
-    end
-
-    matching_files = vim.tbl_map(function(file)
-      return transform_path(file, prefix, workspace_root)
-    end, matching_files)
-
-    if #matching_files == 1 then
-      callback(matching_files[1])
-    elseif #matching_files > 1 then
-      vui(matching_files, {
-        prompt = "Select the appropriate " .. class_entry.name,
-        format_item = function(item)
-          return item
-        end,
-      }, callback)
-    else
-      notify("No matches found for " .. class_entry.name)
-      callback(nil)
-    end
-  end)
+local function table_unique(tbl)
+  return vim.fn.uniq(vim.fn.sort(vim.fn.copy(tbl)))
 end
 
 local function process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
-  process_file_search(class_entry, prefix, workspace_root, current_directory, function(file_result)
-    if file_result then
-      callback(file_result)
-    else
-      local classmap_results = search_autoload_classmap({ class_entry })
-      if classmap_results[class_entry.name] then
-        local paths = classmap_results[class_entry.name]
-        if type(paths) == "table" then
-          if process_classmap_results(paths, class_entry.name, prefix, workspace_root, current_directory, callback) then
-            return
-          end
+  local all_results = {}
+  local same_path = false
+  local file_path, transform_input
+  local function process_paths(paths, is_composer)
+    for _, path in ipairs(paths) do
+      file_path = is_composer and path.path or path
+      transform_input = is_composer and path.fqcn or file_path
+      local dir = vim.fn.fnamemodify(file_path, ":h"):gsub("^" .. sep, "")
+      current_directory = current_directory:gsub("^" .. sep, "")
+      if #paths == 1 and dir ~= current_directory then
+        table.insert(all_results, transform_path(transform_input, prefix, workspace_root, is_composer))
+      elseif #paths > 1 then
+        if dir == current_directory then
+          same_path = true
         end
+        table.insert(all_results, transform_path(transform_input, prefix, workspace_root, is_composer))
       end
+    end
+  end
+
+  local classmap_results = search_autoload_classmap({ class_entry })
+  if classmap_results[class_entry.name] then
+    process_paths(classmap_results[class_entry.name], true)
+  end
+
+  async_search_files(class_entry.name, function(files)
+    process_paths(files, false)
+    all_results = table_unique(all_results)
+
+    if #all_results == 1 then
+      callback(all_results[1])
+    elseif #all_results > 1 then
+      vim_ui_select(all_results, {
+        prompt = string.format("Select the appropriate (%s%s)", same_path and "*** " or "", class_entry.name),
+        format_item = function(item)
+          return item
+        end,
+      }, function(choice)
+        if same_path and transform_path(transform_input, prefix, workspace_root, false) == choice then
+          callback(nil)
+        else
+          callback(choice)
+        end
+      end)
+    else
+      notify("No matches found for " .. class_entry.name)
       callback(nil)
     end
   end)
