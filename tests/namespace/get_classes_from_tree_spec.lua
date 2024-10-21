@@ -61,6 +61,214 @@ describe("M.get_classes_from_tree()", function()
     }, result))
   end)
 
+  it("should return a table of static", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass  {
+      public function add(){
+        StaticClass::test();
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "StaticClass" },
+    }, result))
+  end)
+
+  it("should return a table of enum", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass {
+      public function add(){
+        EnumClass::test;
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "EnumClass" },
+    }, result))
+  end)
+
+  it("should return a table of param", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass  {
+      public function add(ParamClass $param){
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "ParamClass" },
+    }, result))
+  end)
+
+  it("should return a table of scoped", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass {
+      public function add(){
+        (new ScopedClass())->add();
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "ScopedClass" },
+    }, result))
+  end)
+
+  it("should return a table of native", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass {
+      public function add(){
+        $weak = new WeakMap;
+        $weak->count();
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "WeakMap" },
+    }, result))
+  end)
+
+  it("should return a table of trait", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass  {
+        use TestTrait;
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "TestTrait" },
+    }, result))
+  end)
+
+  it("should return a table of implements", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass implements TestInterface  {
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "TestInterface" },
+    }, result))
+  end)
+
+  it("should return a table of class attribute", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      #[Attribute]
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "Attribute" },
+    }, result))
+  end)
+
+  it("should return a table of extend declarations", function()
+    -- Mock the necessary vim functions and API calls
+    local mock_buf = 1
+    local mock_content = [[
+      <?php
+      class TestClass extends ExtendsClass   {
+      }
+    ]]
+
+    -- Set up the mock buffer content
+    vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, vim.split(mock_content, "\n"))
+
+    -- Call the function
+    local result = main.get_classes_from_tree(mock_buf)
+
+    -- Assert the results
+    assert.is_table(result)
+    assert.True(eq({
+      { name = "ExtendsClass" },
+    }, result))
+  end)
+
   it("should handle empty files", function()
     local mock_buf = 0
     vim.api.nvim_buf_set_lines(mock_buf, 0, -1, false, {})
