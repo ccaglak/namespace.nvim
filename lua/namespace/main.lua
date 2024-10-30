@@ -25,7 +25,11 @@ local function get_project_root()
   if cache.root ~= nil then
     return cache.root
   end
-  cache.root = vim.fs.root(0, { "composer.json", ".git", ".env" }) or vim.uv.cwd()
+  cache.root = vim.fs.root(0, {
+    -- "composer.json",
+    ".git",
+    -- ".env"
+  }) or vim.uv.cwd()
   return cache.root
 end
 
@@ -140,10 +144,10 @@ local function transform_path(path, prefix_table, workspace_root, composer)
   end
 
   path = path
-    :gsub(workspace_root, "")
-    :gsub("^" .. sep, "") -- remove first slash
-    :gsub(sep, "\\") -- turn all separators backslashes
-    :gsub("%.php$", "") -- remove .php
+      :gsub(workspace_root, "")
+      :gsub("^" .. sep, "") -- remove first slash
+      :gsub(sep, "\\")      -- turn all separators backslashes
+      :gsub("%.php$", "")   -- remove .php
 
   local first_segment, rest = path:match("([^\\]+)\\(.*)")
   for _, prefix_entry in ipairs(prefix_table) do
@@ -162,6 +166,7 @@ local function async_search_files(pattern, callback)
   local rg_command = {
     "rg",
     "--files",
+    "--no-ignore",
     "--glob",
     pattern .. ".php",
     "--glob",
@@ -241,6 +246,60 @@ local function table_unique(tbl)
   return vim.fn.uniq(vim.fn.sort(vim.fn.copy(tbl)))
 end
 
+local function search_workspace_files(class_name, callback)
+  local rg_command = {
+    "rg",
+    "--files",
+    "--type", "php",
+    "--no-ignore",
+    "--glob", string.format("*%s.php", class_name),
+    "--glob", "!vendor/*",
+    "--glob", "!node_modules/*",
+    get_project_root()
+  }
+
+  vim.system(rg_command, {}, function(obj)
+    local results = {}
+    local seen = {}
+
+    if obj.code == 0 and obj.stdout then
+      for file in obj.stdout:gmatch("[^\r\n]+") do
+        local fd = vim.uv.fs_open(file, "r", 438)
+        if fd then
+          local stat = vim.uv.fs_fstat(fd)
+          local content = vim.uv.fs_read(fd, stat.size, 0)
+          vim.uv.fs_close(fd)
+
+          if content then
+            local namespace = content:match("namespace%s+([^;]+);")
+            if namespace then
+              local fqcn = namespace .. "\\" .. class_name
+              if not seen[fqcn] then
+                seen[fqcn] = true
+                table.insert(results,
+                  -- {
+                  --   file = file,
+                  --   namespace = namespace,
+                  fqcn
+                -- }
+                )
+              end
+            end
+          end
+        end
+      end
+    end
+    vim.schedule(function()
+      callback(results)
+    end)
+  end)
+end
+
+local function is_drupal_project()
+  local core_path = get_project_root() .. "/web/core/lib/Drupal.php"
+  return vim.fn.filereadable(core_path) == 1
+end
+
 local function process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
   local all_results = {}
   local same_path = false
@@ -262,35 +321,65 @@ local function process_single_class(class_entry, prefix, workspace_root, current
     end
   end
 
-  local classmap_results = search_autoload_classmap({ class_entry })
-  if classmap_results[class_entry.name] then
-    process_paths(classmap_results[class_entry.name], true)
-  end
+  if is_drupal_project() then
+    search_workspace_files(class_entry.name, function(files)
+      all_results = files
 
-  async_search_files(class_entry.name, function(files)
-    process_paths(files, false)
-    all_results = table_unique(all_results)
-
-    if #all_results == 1 then
-      callback(all_results[1])
-    elseif #all_results > 1 then
-      vim_ui_select(all_results, {
-        prompt = string.format("Select the appropriate (%s%s)", same_path and "*** " or "", class_entry.name),
-        format_item = function(item)
-          return item
-        end,
-      }, function(choice)
-        if same_path and transform_path(transform_input, prefix, workspace_root, false) == choice then
-          callback(nil)
-        else
-          callback(choice)
+      local classmap_results = search_autoload_classmap({ class_entry })
+      if classmap_results[class_entry.name] then
+        for _, path in ipairs(classmap_results[class_entry.name]) do
+          path.fqcn = path.fqcn:gsub("\\\\", "\\")
+          table.insert(all_results, path.fqcn)
         end
-      end)
-    else
-      notify("No matches found for " .. class_entry.name)
-      callback(nil)
+      end
+      all_results = table_unique(all_results)
+
+      if #all_results == 1 then
+        callback(transform_path(all_results[1], prefix, workspace_root, true))
+      elseif #all_results > 1 then
+        vim_ui_select(all_results, {
+          prompt = string.format("Select the appropriate (%s)", class_entry.name),
+          format_item = function(item)
+            return item
+          end,
+        }, function(choice)
+          callback(transform_path(choice, prefix, workspace_root, true))
+        end)
+      else
+        notify("No matches found for " .. class_entry.name)
+        callback(nil)
+      end
+    end)
+  else
+    local classmap_results = search_autoload_classmap({ class_entry })
+    if classmap_results[class_entry.name] then
+      process_paths(classmap_results[class_entry.name], true)
     end
-  end)
+    async_search_files(class_entry.name, function(files)
+      process_paths(files, false)
+      all_results = table_unique(all_results)
+
+      if #all_results == 1 then
+        callback(all_results[1])
+      elseif #all_results > 1 then
+        vim_ui_select(all_results, {
+          prompt = string.format("Select the appropriate (%s%s)", same_path and "*** " or "", class_entry.name),
+          format_item = function(item)
+            return item
+          end,
+        }, function(choice)
+          if same_path and transform_path(transform_input, prefix, workspace_root, false) == choice then
+            callback(nil)
+          else
+            callback(choice)
+          end
+        end)
+      else
+        notify("No matches found for " .. class_entry.name)
+        callback(nil)
+      end
+    end)
+  end
 end
 
 local function process_class_queue(queue, prefix, workspace_root, current_directory, callback)
