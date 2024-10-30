@@ -296,9 +296,35 @@ local function search_workspace_files(class_name, callback)
 end
 
 local function is_drupal_project()
-  local core_path = get_project_root() .. "/web/core/lib/Drupal.php"
-  return vim.fn.filereadable(core_path) == 1
+  local project_root = get_project_root()
+  -- Check multiple Drupal-specific paths and files
+  local drupal_indicators = {
+    "/web/core/lib/Drupal.php",
+    "/core/lib/Drupal.php",
+    "/modules/contrib",
+    "/modules/custom",
+    "/sites/default/settings.php"
+  }
+
+  for _, path in ipairs(drupal_indicators) do
+    if vim.fn.filereadable(project_root .. path) == 1 or vim.fn.isdirectory(project_root .. path) == 1 then
+      return true
+    end
+  end
+
+  -- Check composer.json for Drupal dependencies
+  local composer_path = project_root .. "/composer.json"
+  if vim.fn.filereadable(composer_path) == 1 then
+    local composer_content = vim.fn.readfile(composer_path)
+    local composer_json = vim.fn.json_decode(composer_content)
+    if composer_json and (composer_json.require and composer_json.require["drupal/core"]) then
+      return true
+    end
+  end
+
+  return false
 end
+
 
 local function process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
   local all_results = {}
