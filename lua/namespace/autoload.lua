@@ -3,7 +3,7 @@ local M = {}
 local notify = require("namespace.notify").notify
 local ns = require("namespace.composer")
 
-local project_root = vim.fs.root(0, { "composer.json", ".git", "package.json", ".env" }) or vim.uv.cwd()
+local project_root = vim.fs.root(0, { ".git" }) or vim.uv.cwd()
 
 local function has_composer_json()
   local composer_json_path = project_root .. "/composer.json"

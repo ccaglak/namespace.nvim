@@ -79,7 +79,9 @@ function N.resolve_from_autoload_psr4()
   local psr4_map = {}
 
   for _, line in ipairs(content) do
-    local prefix, path = line:match("'([^']+)'%s*=>%s*array%(.-'([^']+)'")
+    -- local prefix, path = line:match("'([^']+)'%s*=>%s*array%(.-'([^']+)'") -- single quotes
+    local prefix, path = line:match("['\"]([^'\"]+)['\"]%s*=>%s*array%(.-['\"]([^'\"]+)['\"]") -- double qoutes
+
     if prefix and path then
       path = path:gsub("/", sep):gsub("\\$", "")
       table.insert(psr4_map, {
