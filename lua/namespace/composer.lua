@@ -79,11 +79,10 @@ function N.resolve_from_autoload_psr4()
   local psr4_map = {}
 
   for _, line in ipairs(content) do
-    -- local prefix, path = line:match("'([^']+)'%s*=>%s*array%(.-'([^']+)'") -- single quotes
     local prefix, path = line:match("['\"]([^'\"]+)['\"]%s*=>%s*array%(.-['\"]([^'\"]+)['\"]") -- double qoutes
 
     if prefix and path then
-      path = path:gsub("/", sep):gsub("\\$", "")
+      path = path
       table.insert(psr4_map, {
         prefix = prefix,
         src = path,
@@ -92,10 +91,9 @@ function N.resolve_from_autoload_psr4()
   end
 
   local current_dir = vim.fn.expand("%:h")
-
   current_dir = sep .. current_dir:gsub(root, "")
 
-  for _, entry in ipairs(psr4_map or {}) do
+  for _, entry in ipairs(psr4_map) do
     if current_dir:find(entry.src) ~= nil then
       return "namespace "
         .. current_dir:gsub(entry.src, entry.prefix):gsub("\\\\", "\\"):gsub("\\$", ""):gsub(sep, "")
