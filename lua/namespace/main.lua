@@ -250,12 +250,16 @@ local function search_workspace_files(class_name, callback)
   local rg_command = {
     "rg",
     "--files",
-    "--type", "php",
+    "--type",
+    "php",
     "--no-ignore",
-    "--glob", string.format("*%s.php", class_name),
-    "--glob", "!vendor/*",
-    "--glob", "!node_modules/*",
-    get_project_root()
+    "--glob",
+    string.format("*%s.php", class_name),
+    "--glob",
+    "!vendor/*",
+    "--glob",
+    "!node_modules/*",
+    get_project_root(),
   }
 
   vim.system(rg_command, {}, function(obj)
@@ -276,7 +280,8 @@ local function search_workspace_files(class_name, callback)
               local fqcn = namespace .. "\\" .. class_name
               if not seen[fqcn] then
                 seen[fqcn] = true
-                table.insert(results,
+                table.insert(
+                  results,
                   -- {
                   --   file = file,
                   --   namespace = namespace,
@@ -296,114 +301,119 @@ local function search_workspace_files(class_name, callback)
 end
 
 local function is_drupal_project()
-  local project_root = get_project_root()
-  -- Check multiple Drupal-specific paths and files
-  local drupal_indicators = {
+  local indicators = {
+    "/web/core/composer.json",
     "/web/core/lib/Drupal.php",
-    "/core/lib/Drupal.php",
-    "/modules/contrib",
-    "/modules/custom",
-    "/sites/default/settings.php"
   }
 
-  for _, path in ipairs(drupal_indicators) do
-    if vim.fn.filereadable(project_root .. path) == 1 or vim.fn.isdirectory(project_root .. path) == 1 then
+  for _, path in ipairs(indicators) do
+    if vim.fn.filereadable(root .. path) == 1 then
       return true
     end
   end
 
-  -- Check composer.json for Drupal dependencies
-  local composer_path = project_root .. "/composer.json"
-  if vim.fn.filereadable(composer_path) == 1 then
-    local composer_content = vim.fn.readfile(composer_path)
-    local composer_json = vim.fn.json_decode(composer_content)
-    if composer_json and (composer_json.require and composer_json.require["drupal/core"]) then
-      return true
+  local composer_data = vim.json.decode(vim.fn.join(vim.fn.readfile(get_project_root() .. "/composer.json"), "\n"))
+  if composer_data and composer_data.require then
+    for dep, _ in pairs(composer_data.require) do
+      if dep:match("^drupal/") or dep == "drupal/core" then
+        return true
+      end
     end
   end
 
   return false
 end
 
-
 local function process_single_class(class_entry, prefix, workspace_root, current_directory, callback)
-  local all_results = {}
-  local same_path = false
-  local file_path, transform_input
-  local function process_paths(paths, is_composer)
+  -- Split into smaller focused functions
+  local function handle_drupal_results(results, class_entry)
+    results = table_unique(results)
+    if #results == 1 then
+      callback(transform_path(results[1], prefix, workspace_root, true))
+    elseif #results > 1 then
+      vim_ui_select(results, {
+        prompt = string.format("Select the appropriate (%s)", class_entry.name),
+        format_item = function(item)
+          return item
+        end,
+      }, function(choice)
+        callback(transform_path(choice, prefix, workspace_root, true))
+      end)
+    else
+      notify("No matches found for " .. class_entry.name)
+      callback(nil)
+    end
+  end
+
+  local function handle_standard_results(all_results, same_path, transform_input)
+    all_results = table_unique(all_results)
+    if #all_results == 1 then
+      callback(all_results[1])
+    elseif #all_results > 1 then
+      vim_ui_select(all_results, {
+        prompt = string.format("Select the appropriate (%s%s)", same_path and "*** " or "", class_entry.name),
+        format_item = function(item)
+          return item
+        end,
+      }, function(choice)
+        if same_path and transform_path(transform_input, prefix, workspace_root, false) == choice then
+          callback(nil)
+        else
+          callback(choice)
+        end
+      end)
+    else
+      notify("No matches found for " .. class_entry.name)
+      callback(nil)
+    end
+  end
+
+  local function process_paths(paths, is_composer, all_results, same_path)
     for _, path in ipairs(paths) do
-      file_path = is_composer and path.path or path
-      transform_input = is_composer and path.fqcn or file_path
+      local file_path = is_composer and path.path or path
+      local transform_input = is_composer and path.fqcn or file_path
       local dir = vim.fn.fnamemodify(file_path, ":h"):gsub("^" .. sep, "")
-      current_directory = current_directory:gsub("^" .. sep, "")
-      if #paths == 1 and dir ~= current_directory then
+      local curr_dir = current_directory:gsub("^" .. sep, "")
+
+      if #paths == 1 and dir ~= curr_dir then
         table.insert(all_results, transform_path(transform_input, prefix, workspace_root, is_composer))
       elseif #paths > 1 then
-        if dir == current_directory then
+        if dir == curr_dir then
           same_path = true
         end
         table.insert(all_results, transform_path(transform_input, prefix, workspace_root, is_composer))
       end
     end
+    return same_path
   end
 
   if is_drupal_project() then
     search_workspace_files(class_entry.name, function(files)
-      all_results = files
-
+      local all_results = files
       local classmap_results = search_autoload_classmap({ class_entry })
+
       if classmap_results[class_entry.name] then
         for _, path in ipairs(classmap_results[class_entry.name]) do
           path.fqcn = path.fqcn:gsub("\\\\", "\\")
           table.insert(all_results, path.fqcn)
         end
       end
-      all_results = table_unique(all_results)
 
-      if #all_results == 1 then
-        callback(transform_path(all_results[1], prefix, workspace_root, true))
-      elseif #all_results > 1 then
-        vim_ui_select(all_results, {
-          prompt = string.format("Select the appropriate (%s)", class_entry.name),
-          format_item = function(item)
-            return item
-          end,
-        }, function(choice)
-          callback(transform_path(choice, prefix, workspace_root, true))
-        end)
-      else
-        notify("No matches found for " .. class_entry.name)
-        callback(nil)
-      end
+      handle_drupal_results(all_results, class_entry)
     end)
   else
+    local all_results = {}
+    local same_path = false
+    local transform_input
+
     local classmap_results = search_autoload_classmap({ class_entry })
     if classmap_results[class_entry.name] then
-      process_paths(classmap_results[class_entry.name], true)
+      same_path = process_paths(classmap_results[class_entry.name], true, all_results, same_path)
     end
-    async_search_files(class_entry.name, function(files)
-      process_paths(files, false)
-      all_results = table_unique(all_results)
 
-      if #all_results == 1 then
-        callback(all_results[1])
-      elseif #all_results > 1 then
-        vim_ui_select(all_results, {
-          prompt = string.format("Select the appropriate (%s%s)", same_path and "*** " or "", class_entry.name),
-          format_item = function(item)
-            return item
-          end,
-        }, function(choice)
-          if same_path and transform_path(transform_input, prefix, workspace_root, false) == choice then
-            callback(nil)
-          else
-            callback(choice)
-          end
-        end)
-      else
-        notify("No matches found for " .. class_entry.name)
-        callback(nil)
-      end
+    async_search_files(class_entry.name, function(files)
+      same_path = process_paths(files, false, all_results, same_path)
+      handle_standard_results(all_results, same_path, transform_input)
     end)
   end
 end
