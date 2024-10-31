@@ -144,10 +144,10 @@ local function transform_path(path, prefix_table, workspace_root, composer)
   end
 
   path = path
-      :gsub(workspace_root, "")
-      :gsub("^" .. sep, "") -- remove first slash
-      :gsub(sep, "\\")      -- turn all separators backslashes
-      :gsub("%.php$", "")   -- remove .php
+    :gsub(workspace_root, "")
+    :gsub("^" .. sep, "") -- remove first slash
+    :gsub(sep, "\\") -- turn all separators backslashes
+    :gsub("%.php$", "") -- remove .php
 
   local first_segment, rest = path:match("([^\\]+)\\(.*)")
   for _, prefix_entry in ipairs(prefix_table) do
@@ -286,7 +286,7 @@ local function search_workspace_files(class_name, callback)
                   --   file = file,
                   --   namespace = namespace,
                   fqcn
-                -- }
+                  -- }
                 )
               end
             end
@@ -301,18 +301,19 @@ local function search_workspace_files(class_name, callback)
 end
 
 local function is_drupal_project()
+  local project_root = get_project_root()
   local indicators = {
     "/web/core/composer.json",
     "/web/core/lib/Drupal.php",
   }
 
   for _, path in ipairs(indicators) do
-    if vim.fn.filereadable(root .. path) == 1 then
+    if vim.fn.filereadable(project_root .. path) == 1 then
       return true
     end
   end
 
-  local composer_data = vim.json.decode(vim.fn.join(vim.fn.readfile(get_project_root() .. "/composer.json"), "\n"))
+  local composer_data = vim.json.decode(vim.fn.join(vim.fn.readfile(project_root .. "/composer.json"), "\n"))
   if composer_data and composer_data.require then
     for dep, _ in pairs(composer_data.require) do
       if dep:match("^drupal/") or dep == "drupal/core" then
