@@ -56,6 +56,16 @@ Neovim Php Namespace Resolver
 ```
 
 ## Requires
+-- namespace.nvim uses autoload_classmap.php to resolve classes in vendor.
+-- either composer dump-autoload manually or add this to composer.json
+
+```json
+  "scripts": {
+    "post-update-cmd": "@dumpAutoload",
+    "post-install-cmd": "@dumpAutoload",
+    "dumpAutoload": "composer dump-autoload --optimize"
+  },
+```
 
 -   nvim-treesitter (`:TSInstall php json`)
 -   brew install ripgrep

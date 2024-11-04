@@ -22,7 +22,6 @@ M.run_composer_dump_autoload = function()
     if exit_code == 0 then
       notify("Composer dump-autoload completed successfully")
     else
-      local output = vim.fn.join(vim.fn.jobread(job_id), "\n")
       notify("Composer dump-autoload failed")
     end
   end
