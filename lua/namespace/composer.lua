@@ -10,10 +10,17 @@ local cache = {
 local sep = vim.uv.os_uname().sysname == "Windows_NT" and "\\" or "/"
 local root = vim.fs.root(0, { ".git" }) or vim.uv.cwd()
 
+local function normalize_path(path)
+  path = path:gsub("[/\\]", sep)
+  path = path:gsub(sep .. sep, sep)
+  path = path:gsub(sep .. "$", "")
+  return path
+end
+
 local function is_drupal_project()
   local indicators = {
-    "/web/core/composer.json",
-    "/web/core/lib/Drupal.php",
+    normalize_path("/web/core/composer.json"),
+    normalize_path("/web/core/lib/Drupal.php"),
   }
 
   for _, path in ipairs(indicators) do
@@ -22,7 +29,7 @@ local function is_drupal_project()
     end
   end
 
-  local composer_data = vim.json.decode(vim.fn.join(vim.fn.readfile(root .. "/composer.json"), "\n"))
+  local composer_data = vim.json.decode(vim.fn.join(vim.fn.readfile(root .. sep .. "composer.json"), "\n"))
   if composer_data and composer_data.require then
     for dep, _ in pairs(composer_data.require) do
       if dep:match("^drupal/") or dep == "drupal/core" then
@@ -70,7 +77,7 @@ function N.resolve_namespace_composer()
 end
 
 function N.resolve_from_autoload_psr4()
-  local autoload_file = root .. "/vendor/composer/autoload_psr4.php"
+  local autoload_file = root .. normalize_path("/vendor/composer/autoload_psr4.php")
   if vim.fn.filereadable(autoload_file) ~= 1 then
     return nil
   end
