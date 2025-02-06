@@ -73,4 +73,9 @@ Neovim Php Namespace Resolver
 
 -   by VSCode Php Namespace Resolver
 
+
+## Self Promotion
+
+- [Condo Painters Pro](https://www.condopainterspro.ca)
+
 ## License MIT
